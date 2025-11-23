@@ -1,0 +1,2 @@
+# doneyt
+Simple donation sytem
