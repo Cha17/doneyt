@@ -1,9 +1,26 @@
 import Image from "next/image";
+import Header from "./components/Header";
+import Hero from "./components/Hero";
+import DriveCard from "./components/DriveCard";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <>
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-tr from-[#012326] to-[#013e4a] font-sans dark:bg-black">
+        <Header />
+        <Hero />
+        {/* DriveCard is shown below the Hero */}
+        <div className="w-full flex justify-center mt-12 md:mt-0">
+          <DriveCard
+            driveId={"1"}
+            title={"Sample Drive Title"}
+            shortDescription={"This is a sample description of the drive."}
+            currentAmount={25}
+            imageUrl={"/sample.png"}
+            targetAmount={100}
+          />
+        </div>
+        {/* <main className="flex  w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-[#f5f5f5] dark:bg-black sm:items-start">
         <Image
           className="dark:invert"
           src="/next.svg"
@@ -59,7 +76,16 @@ export default function Home() {
             Documentation
           </a>
         </div>
-      </main>
-    </div>
+      </main> */}
+      </div>
+      <DriveCard
+        driveId={"1"}
+        title={"Sample Drive Title"}
+        shortDescription={"This is a sample description of the drive."}
+        currentAmount={25}
+        imageUrl={"/sample.png"}
+        targetAmount={100}
+      />
+    </>
   );
 }
