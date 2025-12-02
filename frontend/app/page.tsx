@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Hero from "./components/Hero";
 import DriveCard from "./components/DriveCard";
 import FeaturedDrives from "./components/FeaturedDrives";
+import Footer from "./components/Footer";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
         <Header />
         <Hero />
         <FeaturedDrives />
+        <Footer />
         {/* <main className="flex  w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-[#f5f5f5] dark:bg-black sm:items-start">
         <Image
           className="dark:invert"
