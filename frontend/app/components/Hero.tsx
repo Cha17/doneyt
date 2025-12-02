@@ -5,7 +5,7 @@ import React from "react";
 
 export default function Hero() {
   return (
-    <section className="pt-20 py-20 max-w-7xl mx-auto px-6">
+    <section className="pt-32 py-20 max-w-7xl mx-auto px-6">
       <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-30">
         {/* Left Column */}
         <div className="flex-1 w-full md:w-1/2 flex flex-col items-start md:text-left py-25">
@@ -25,7 +25,7 @@ export default function Hero() {
         {/* Right Column */}
         <div className="flex-1 w-full md:w-1/2 flex justify-center">
           <Image
-            src="/hand-coins.png"
+            src="/images/hand-coins.png"
             alt="Hand Coins"
             width={500}
             height={500}
