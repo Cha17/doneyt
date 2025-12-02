@@ -13,7 +13,8 @@ import Image from "next/image";
 interface DriveCardProps {
   driveId: string;
   title: string;
-  shortDescription: string;
+  organization: string;
+  description: string;
   currentAmount: number;
   targetAmount?: number;
   imageUrl: string;
@@ -22,7 +23,8 @@ interface DriveCardProps {
 export default function DriveCard({
   driveId,
   title,
-  shortDescription,
+  organization,
+  description,
   currentAmount,
   targetAmount = 0,
   imageUrl,
@@ -47,7 +49,7 @@ export default function DriveCard({
     }).format(targetAmount || 0);
   };
   return (
-    <Card className="w-[340px] rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-white border border-gray-200 pt-0 pb-6">
+    <Card className="w-96 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-white border border-gray-200 pt-0 pb-6">
       <div className="relative w-full h-44 bg-gray-100">
         <Image
           src={imageUrl}
@@ -58,9 +60,12 @@ export default function DriveCard({
         />
       </div>
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">{title}</CardTitle>
-        <CardDescription className="text-gray-600">
-          {shortDescription}
+        <CardTitle className="text-xl font-semibold">
+          {title}
+          <div className="text-gray-600 text-sm">{organization}</div>
+        </CardTitle>
+        <CardDescription className="text-gray-600 line-clamp-2">
+          {description}
         </CardDescription>
       </CardHeader>
       <CardContent>

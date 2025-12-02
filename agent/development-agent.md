@@ -16,7 +16,7 @@
 
 ## Tech Stack
 
-**Next.js + TS + Tailwind | Hono + Drizzle + Neon**
+**Next.js + TS + Tailwind + Shadcn ui | Hono + Drizzle + Neon**
 
 ## Checkpoint Format (EXACT)
 
@@ -30,6 +30,7 @@
 
    1.2 Set up basic [structure] with TypeScript (including detailed imports)
 
+   (add some simple and short explanation of its purpose for instructions that are not basic)
    1.3 [Detailed instruction 1]
 
    1.4 [Detailed instruction 2]

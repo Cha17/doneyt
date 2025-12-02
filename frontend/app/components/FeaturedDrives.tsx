@@ -1,6 +1,6 @@
 import React from "react";
 import DriveCard from "./DriveCard";
-import { featuredDrives } from "@/data/featuredDrives";
+import { allDrives } from "@/data/allDrives";
 
 export default function FeaturedDrives() {
   return (
@@ -9,12 +9,13 @@ export default function FeaturedDrives() {
         Featured Drives
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {featuredDrives.map((drive) => (
+        {allDrives.slice(0, 3).map((drive) => (
           <DriveCard
             key={drive.id}
             driveId={drive.id}
             title={drive.title}
-            shortDescription={drive.shortDescription}
+            organization={drive.organization}
+            description={drive.description}
             currentAmount={drive.currentAmount}
             targetAmount={drive.targetAmount}
             imageUrl={drive.imageUrl}
