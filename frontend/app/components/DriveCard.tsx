@@ -9,16 +9,12 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
-
-interface DriveCardProps {
-  driveId: string;
-  title: string;
-  organization: string;
-  description: string;
-  currentAmount: number;
-  targetAmount?: number;
-  imageUrl: string;
-}
+import { Drive } from "@/data/allDrives";
+import {
+  formattedCurrent,
+  formattedTarget,
+  getDriveProgress,
+} from "@/utils/formatCurrency";
 
 export default function DriveCard({
   driveId,
@@ -26,28 +22,9 @@ export default function DriveCard({
   organization,
   description,
   currentAmount,
-  targetAmount = 0,
+  targetAmount,
   imageUrl,
-}: DriveCardProps) {
-  const progress = ({ currentAmount, targetAmount = 0 }: DriveCardProps) => {
-    return Math.min(Math.round((currentAmount / targetAmount) * 100), 100);
-  };
-
-  const formattedCurrent = ({ currentAmount }: DriveCardProps) => {
-    return new Intl.NumberFormat("en-PH", {
-      style: "currency",
-      currency: "PHP",
-      minimumFractionDigits: 0,
-    }).format(currentAmount);
-  };
-
-  const formattedTarget = ({ targetAmount }: DriveCardProps) => {
-    return new Intl.NumberFormat("en-PH", {
-      style: "currency",
-      currency: "PHP",
-      minimumFractionDigits: 0,
-    }).format(targetAmount || 0);
-  };
+}: Drive) {
   return (
     <Card className="w-96 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-white border border-gray-200 pt-0 pb-6">
       <div className="relative w-full h-44 bg-gray-100">
@@ -71,21 +48,16 @@ export default function DriveCard({
       <CardContent>
         <div className="flex justify-between items-center mb-2 text-sm text-gray-700">
           <span>
-            {formattedCurrent({ currentAmount } as DriveCardProps)} /{" "}
-            {formattedTarget({ targetAmount } as DriveCardProps)}
+            {formattedCurrent({ currentAmount } as Drive)} /{" "}
+            {formattedTarget({ targetAmount } as Drive)}
           </span>
-          <span>
-            {progress({ currentAmount, targetAmount } as DriveCardProps)}%
-          </span>
+          <span>{getDriveProgress(currentAmount, targetAmount)}%</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-3 mt-2 mb-2">
           <div
             className="bg-linear-to-r from-[#032040] via-[#1C7D91] to-[#7BAC6B] h-3 rounded-full transition-all"
             style={{
-              width: `${progress({
-                currentAmount,
-                targetAmount,
-              } as DriveCardProps)}%`,
+              width: `${getDriveProgress(currentAmount, targetAmount)}%`,
             }}
           />
         </div>
