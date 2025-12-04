@@ -11,8 +11,8 @@ export default function FeaturedDrives() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {allDrives.slice(0, 3).map((drive) => (
           <DriveCard
-            key={drive.id}
-            driveId={drive.id}
+            key={drive.driveId}
+            driveId={drive.driveId}
             title={drive.title}
             organization={drive.organization}
             description={drive.description}

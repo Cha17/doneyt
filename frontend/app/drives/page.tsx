@@ -9,6 +9,7 @@ import DriveCard from "../components/DriveCard";
 import Image from "next/image";
 import NoDrivesFound from "../components/NoDrivesFound";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { getDriveProgress } from "@/utils/formatCurrency";
 
 export default function DrivesPage() {
   const [filter, setfilter] = useState<string>("Active");
@@ -30,12 +31,18 @@ export default function DrivesPage() {
     // Filter by selected filter type
     if (filter === "Active") {
       filtered = filtered.filter((drive) => {
-        const progress = (drive.currentAmount / drive.targetAmount) * 100;
+        const progress = getDriveProgress(
+          drive.currentAmount,
+          drive.targetAmount || 0
+        );
         return progress < 100;
       });
     } else if (filter === "Ending Soon") {
       filtered = filtered.filter((drive) => {
-        const progress = (drive.currentAmount / drive.targetAmount) * 100;
+        const progress = getDriveProgress(
+          drive.currentAmount,
+          drive.targetAmount || 0
+        );
         return progress >= 80 && progress < 100;
       });
     } else if (filter === "Popular") {
@@ -116,8 +123,8 @@ export default function DrivesPage() {
             ) : (
               paginatedDrives.map((drive) => (
                 <DriveCard
-                  key={drive.id}
-                  driveId={drive.id}
+                  key={drive.driveId}
+                  driveId={drive.driveId}
                   title={drive.title}
                   organization={drive.organization}
                   description={drive.description}
