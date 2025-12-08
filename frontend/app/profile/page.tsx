@@ -23,16 +23,15 @@ export default function ProfilePage() {
           <h1 className="text-4xl font-bold text-white text-center">Profile</h1>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6  w-full">
+        <div className="max-w-7xl mx-auto w-full">
           {/* Main Profile Card */}
-          <div className="flex flex-col lg:flex-row gap-6 items-start">
-            <div className="flex flex-col lg:flex-row gap-6 items-start">
-              <div className="flex-1 w-full">
-                <Card className="bg-linear-to-tr from-[#032040] via-[#1C7D91] to-[#7BAC6B] rounded-lg shadow-md p-8 mb-8 border border-none">
-                  <div className="flex flex-col items-center">
-                    <div className="mb-4">
-                      <h1
-                        className="
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
+            <div className="flex-1 w-full">
+              <Card className="bg-linear-to-tr from-[#032040] via-[#1C7D91] to-[#7BAC6B] rounded-lg shadow-md p-8 mb-8 border border-none">
+                <div className="flex flex-col items-center">
+                  <div className="mb-4">
+                    <h1
+                      className="
                     text-center font-extrabold text-white
                     text-4xl
                     sm:text-5xl
@@ -41,39 +40,38 @@ export default function ProfilePage() {
                     overflow-hidden
                     truncate
                     "
-                        style={{
-                          fontSize:
-                            totalDonations > 999999999
-                              ? "2rem"
-                              : totalDonations > 999999
-                              ? "2.5rem"
-                              : "",
-                          lineHeight: 1.1,
-                        }}
-                        title={formatCurrency(totalDonations)}
-                      >
-                        {formatCurrency(totalDonations)}
-                      </h1>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <h4 className="text-md font-bold text-gray-200 uppercase">
-                        TOTAL DONATED
-                      </h4>
-                      <p className="text-sm text-gray-300">
-                        Cumulative amount you’ve given across all drives.
-                      </p>
-                    </div>
+                      style={{
+                        fontSize:
+                          totalDonations > 999999999
+                            ? "2rem"
+                            : totalDonations > 999999
+                            ? "2.5rem"
+                            : "",
+                        lineHeight: 1.1,
+                      }}
+                      title={formatCurrency(totalDonations)}
+                    >
+                      {formatCurrency(totalDonations)}
+                    </h1>
                   </div>
-                </Card>
-                <UserDonations />
-              </div>
+                  <div className="flex flex-col items-center">
+                    <h4 className="text-md font-bold text-gray-200 uppercase">
+                      TOTAL DONATED
+                    </h4>
+                    <p className="text-sm text-gray-300">
+                      Cumulative amount you’ve given across all drives.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+              <UserDonations />
             </div>
             <Card className="bg-gray-200 rounded-lg shadow-md mb-8 p-8">
               <div className="flex flex-col md:flex-row gap-12">
                 {/* Left Column - Personal Information */}
                 <div className="flex-1 space-y-6">
                   {/* PERSONAL INFORMATION Section */}
-                  <h2 className="text-lg font-bold text-black uppercase mb-4 text-center">
+                  <h2 className="text-lg font-bold text-black uppercase mb-4">
                     PERSONAL INFORMATION
                   </h2>
                   <div className="flex flex-col items-center md:items-center">
@@ -139,7 +137,7 @@ export default function ProfilePage() {
                     <h2 className="text-lg font-bold text-black uppercase mb-4">
                       SIGN IN METHODS
                     </h2>
-                    <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal">
+                    <Button className="bg-[#032040]  text-white rounded-lg px-4 py-2 text-sm font-normal">
                       <span className="text-white font-bold text-lg">G</span>
                       <span className="text-white">qiuyuan@gmail.com</span>
                     </Button>
