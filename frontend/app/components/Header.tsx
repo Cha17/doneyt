@@ -21,6 +21,9 @@ export default function Header() {
           <Link href="/profile" className="text-white">
             profile
           </Link>
+          <Link href="/sample" className="text-white">
+            sample
+          </Link>
         </div>
       </div>
     </header>

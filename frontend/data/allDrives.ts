@@ -210,3 +210,18 @@ export const allDrives: Drive[] = [
     ],
   },
 ];
+
+
+export const userDonations = [{
+  driveId: "1",
+  amount: 500,
+  date: "Dec 15, 2024",
+}, {
+  driveId: "2",
+  amount: 1902432000435534987,
+  date: "Dec 10, 2024",
+}, {
+  driveId: "3",
+  amount: 750,
+  date: "Dec 5, 2024",
+}]
