@@ -74,6 +74,8 @@ export default function ProfilePage() {
                   <h2 className="text-lg font-bold text-black uppercase mb-4">
                     PERSONAL INFORMATION
                   </h2>
+
+                  {/* Profile Pic & Change Photo Button */}
                   <div className="flex flex-col items-center md:items-center">
                     <div className="w-56 h-56 bg-gray-300 rounded-full overflow-hidden mb-8">
                       <Image
@@ -89,6 +91,8 @@ export default function ProfilePage() {
                       CHANGE PHOTO
                     </Button>
                   </div>
+
+                  {/* Personal Information Form */}
                   <div className="flex flex-row gap-8">
                     <div className="flex-1">
                       <Label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -111,9 +115,9 @@ export default function ProfilePage() {
                       />
                     </div>
                   </div>
-                  <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal">
+                  {/* <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal">
                     SAVE
-                  </Button>
+                  </Button> */}
                   <div className="space-y-2">
                     <Label className="block text-sm font-semibold text-gray-700 mb-2">
                       Email
