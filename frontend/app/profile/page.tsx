@@ -26,98 +26,17 @@ export default function ProfilePage() {
         <div className="max-w-7xl mx-auto px-6 py-12 w-full">
           <h1 className="text-4xl font-bold text-white text-center">Profile</h1>
         </div>
-        <div className="max-w-7xl mx-auto px-6  w-full">
+        {/* <div className="max-w-7xl mx-auto px-6  w-full">
+         */}
+        <div className="max-w-7xl mx-auto w-full">
           {/* Main Profile Card */}
-          <Card className="bg-gray-200 rounded-lg shadow-md mb-8 p-8">
-            <div className="flex flex-col md:flex-row gap-12">
-              {/* Left Column - Personal Information */}
-              <div className="flex-1 space-y-6">
-                {/* PERSONAL INFORMATION Section */}
-                <h2 className="text-lg font-bold text-black uppercase mb-4">
-                  PERSONAL INFORMATION
-                </h2>
-                <div className="flex flex-row gap-8">
-                  <div className="flex-1">
-                    <Label className="block text-sm font-semibold text-gray-700 mb-2">
-                      First Name
-                    </Label>
-                    <Input
-                      type="text"
-                      placeholder="First Name"
-                      className="bg-[#1C7D91] text-white rounded-lg placeholder:text-gray-300"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Last Name
-                    </Label>
-                    <Input
-                      type="text"
-                      placeholder="Last Name"
-                      className="bg-[#1C7D91] text-white rounded-lg placeholder:text-gray-300"
-                    />
-                  </div>
-                </div>
-                <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal">
-                  SAVE
-                </Button>
-                <div className="space-y-2">
-                  <Label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email
-                  </Label>
-                  <div className="flex items-center gap-4">
-                    <Input
-                      type="email"
-                      placeholder="Email"
-                      readOnly
-                      className="bg-[#1C7D91] text-white rounded-lg placeholder:text-gray-300 flex-1"
-                    />
-                    <Link
-                      href="/sample"
-                      className="text-black text-sm font-semibold hover:underline"
-                    >
-                      Change Email
-                    </Link>
-                  </div>
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-black uppercase mb-4">
-                    SIGN IN METHODS
-                  </h2>
-                  <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal">
-                    <span className="text-white font-bold text-lg">G</span>
-                    <span className="text-white">qiuyuan@gmail.com</span>
-                  </Button>
-                </div>
-              </div>
-              <div className="flex flex-col items-center md:items-center">
-                <div className="w-56 h-56 bg-gray-300 rounded-full overflow-hidden mb-8">
-                  <Image
-                    src="/images/sample.png"
-                    alt="Profile"
-                    width={224}
-                    height={224}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-
-                <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal w-full md:w-auto">
-                  CHANGE PHOTO
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          <div className="flex flex-col lg:flex-row gap-6 items-start">
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
             <div className="flex-1 w-full">
-              <UserDonations />
-            </div>
-
-            <Card className="bg-linear-to-tr from-[#032040] via-[#1C7D91] to-[#7BAC6B] rounded-lg shadow-md p-8 mb-8 w-lg border border-none">
-              <div className="flex flex-col items-center">
-                <div className="mb-4">
-                  <h1
-                    className="
+              <Card className="bg-linear-to-tr from-[#032040] via-[#1C7D91] to-[#7BAC6B] rounded-lg shadow-md p-8 mb-8 border border-none">
+                <div className="flex flex-col items-center">
+                  <div className="mb-4">
+                    <h1
+                      className="
                     text-center font-extrabold text-white
                     text-4xl
                     sm:text-5xl
@@ -126,27 +45,108 @@ export default function ProfilePage() {
                     overflow-hidden
                     truncate
                     "
-                    style={{
-                      fontSize:
-                        totalDonations > 999999999
-                          ? "2rem"
-                          : totalDonations > 999999
-                          ? "2.5rem"
-                          : "",
-                      lineHeight: 1.1,
-                    }}
-                    title={formatCurrency(totalDonations)}
-                  >
-                    {formatCurrency(totalDonations)}
-                  </h1>
+                      style={{
+                        fontSize:
+                          totalDonations > 999999999
+                            ? "2rem"
+                            : totalDonations > 999999
+                            ? "2.5rem"
+                            : "",
+                        lineHeight: 1.1,
+                      }}
+                      title={formatCurrency(totalDonations)}
+                    >
+                      {formatCurrency(totalDonations)}
+                    </h1>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <h4 className="text-md font-bold text-gray-200 uppercase">
+                      TOTAL DONATED
+                    </h4>
+                    <p className="text-sm text-gray-300">
+                      Cumulative amount you’ve given across all drives.
+                    </p>
+                  </div>
                 </div>
-                <div className="flex flex-col items-center">
-                  <h4 className="text-md font-bold text-gray-200 uppercase">
-                    TOTAL DONATED
-                  </h4>
-                  <p className="text-sm text-gray-300">
-                    Cumulative amount you’ve given across all drives.
-                  </p>
+              </Card>
+              <UserDonations />
+            </div>
+            <Card className="bg-gray-200 rounded-lg shadow-md mb-8 p-8">
+              <div className="flex flex-col md:flex-row gap-12">
+                {/* Left Column - Personal Information */}
+                <div className="flex-1 space-y-6">
+                  {/* PERSONAL INFORMATION Section */}
+                  <h2 className="text-lg font-bold text-black uppercase mb-4">
+                    PERSONAL INFORMATION
+                  </h2>
+                  <div className="flex flex-row gap-8">
+                    <div className="flex-1">
+                      <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                        First Name
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="First Name"
+                        className="bg-[#1C7D91] text-white rounded-lg placeholder:text-gray-300"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Last Name
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="Last Name"
+                        className="bg-[#1C7D91] text-white rounded-lg placeholder:text-gray-300"
+                      />
+                    </div>
+                  </div>
+                  <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal">
+                    SAVE
+                  </Button>
+                  <div className="space-y-2">
+                    <Label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Email
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        type="email"
+                        placeholder="Email"
+                        readOnly
+                        className="bg-[#1C7D91] text-white rounded-lg placeholder:text-gray-300 flex-1"
+                      />
+                      <Link
+                        href="/sample"
+                        className="text-black text-sm font-semibold hover:underline"
+                      >
+                        Change Email
+                      </Link>
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-black uppercase mb-4">
+                      SIGN IN METHODS
+                    </h2>
+                    <Button className="bg-[#032040]  text-white rounded-lg px-4 py-2 text-sm font-normal">
+                      <span className="text-white font-bold text-lg">G</span>
+                      <span className="text-white">qiuyuan@gmail.com</span>
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center md:items-center">
+                  <div className="w-56 h-56 bg-gray-300 rounded-full overflow-hidden mb-8">
+                    <Image
+                      src="/images/sample.png"
+                      alt="Profile"
+                      width={224}
+                      height={224}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+
+                  <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal w-full md:w-auto">
+                    CHANGE PHOTO
+                  </Button>
                 </div>
               </div>
             </Card>
