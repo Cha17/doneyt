@@ -227,7 +227,7 @@ export function UserDonations() {
       {/* View All Link */}
       <div className="mt-6 text-center">
         <Link
-          href="/donations"
+          href="/sample/alldon"
           className="text-[#1C7D91] font-semibold hover:underline"
         >
           View All Donations →
