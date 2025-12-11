@@ -160,17 +160,11 @@ export default function ProfilePage() {
 
 export function UserDonations() {
   const [open, setOpen] = useState(false);
+
   return (
     <Card className="bg-gray-200 rounded-lg shadow-md mb-8 p-8">
       <h2 className="text-lg font-bold text-black uppercase">MY DONATIONS</h2>
-      {/* <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-400">
-        <span className="text-sm font-semibold text-gray-700">
-          Total Donated
-        </span>
-        <span className="text-2xl font-bold text-black">
-          {formatCurrency(totalDonations)}
-        </span>
-      </div> */}
+
       {userDonations.length === 0 ? (
         <p className="text-gray-600 text-center py-8">
           You have not made any donations yet.
@@ -181,13 +175,7 @@ export function UserDonations() {
             const drive = allDrives.find((d) => d.driveId === donation.driveId);
             if (!drive) return null;
             return (
-              <div
-                key={donation.driveId}
-                className="block"
-                onClick={() => {
-                  setOpen(true);
-                }}
-              >
+              <div key={donation.driveId} className="block">
                 <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow border border-gray-300">
                   <div className="flex items-center gap-4">
                     <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">

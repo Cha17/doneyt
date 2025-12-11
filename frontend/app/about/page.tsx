@@ -58,7 +58,7 @@ export default function AboutPage() {
             {/* Transparency */}
             <div className="flex flex-col items-center justify-center">
               <div
-                className="bg-white rounded-full shadow-md flex flex-col items-center justify-center mx-auto mb-8"
+                className="bg-[#1C7D91] rounded-full shadow-md flex flex-col items-center justify-center mx-auto mb-8"
                 style={{
                   width: "180px",
                   height: "180px",
@@ -66,7 +66,7 @@ export default function AboutPage() {
                   minHeight: "180px",
                 }}
               >
-                <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">
+                <h3 className="text-xl font-semibold text-white mb-2 text-center">
                   Community
                 </h3>
               </div>
@@ -78,7 +78,7 @@ export default function AboutPage() {
             {/* Community */}
             <div className="flex flex-col items-center justify-center">
               <div
-                className="bg-white rounded-full shadow-md flex flex-col items-center justify-center mx-auto mb-8"
+                className="bg-[#1C7D91] rounded-full shadow-md flex flex-col items-center justify-center mx-auto mb-8"
                 style={{
                   width: "180px",
                   height: "180px",
@@ -86,7 +86,7 @@ export default function AboutPage() {
                   minHeight: "180px",
                 }}
               >
-                <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">
+                <h3 className="text-xl font-semibold text-white mb-2 text-center">
                   Transparency
                 </h3>
               </div>
@@ -98,7 +98,7 @@ export default function AboutPage() {
             {/* Impact */}
             <div className="flex flex-col items-center justify-center">
               <div
-                className="bg-white rounded-full shadow-md flex flex-col items-center justify-center mx-auto mb-8"
+                className="bg-[#1C7D91] rounded-full shadow-md flex flex-col items-center justify-center mx-auto mb-8"
                 style={{
                   width: "180px",
                   height: "180px",
@@ -106,7 +106,7 @@ export default function AboutPage() {
                   minHeight: "180px",
                 }}
               >
-                <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">
+                <h3 className="text-xl font-semibold text-white mb-2 text-center">
                   Impact
                 </h3>
               </div>
