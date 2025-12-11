@@ -9,7 +9,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { Drive } from "@/data/allDrives";
 
@@ -215,25 +214,12 @@ export default function DonationReceiptModal({
                 {drive.organization}
               </p>
             </div>
-          </div>
-
-          {/* Drive Image */}
-          <div className="w-32 h-32 rounded-lg overflow-hidden mx-auto my-4">
-            <Image
-              src={drive.imageUrl}
-              alt={drive.title}
-              width={128}
-              height={128}
-              className="object-cover w-full h-full"
-            />
-          </div>
-
-          {/* Amount Section */}
-          <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-200">
-            <p className="text-lg text-gray-700 mb-2">Donation Amount:</p>
-            <p className="text-3xl font-bold text-[#032040]">
-              {formatCurrency(donation.amount)}
-            </p>
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-gray-600">Amount:</p>
+              <p className="text-sm font-semibold text-gray-900">
+                {formatCurrency(donation.amount)}
+              </p>
+            </div>
           </div>
 
           {/* Footer */}

@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -8,6 +10,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { allDrives, userDonations } from "@/data/allDrives";
 import { formatCurrency } from "@/utils/formatCurrency";
+import { useState } from "react";
+import DonationReceiptModal from "./SampleReceipt";
 
 export default function ProfilePage() {
   const totalDonations = userDonations.reduce<number>(
@@ -155,6 +159,7 @@ export default function ProfilePage() {
 }
 
 export function UserDonations() {
+  const [open, setOpen] = useState(false);
   return (
     <Card className="bg-gray-200 rounded-lg shadow-md mb-8 p-8">
       <h2 className="text-lg font-bold text-black uppercase">MY DONATIONS</h2>
@@ -176,10 +181,12 @@ export function UserDonations() {
             const drive = allDrives.find((d) => d.driveId === donation.driveId);
             if (!drive) return null;
             return (
-              <Link
+              <div
                 key={donation.driveId}
-                href={`/drives/${donation.driveId}`}
                 className="block"
+                onClick={() => {
+                  setOpen(true);
+                }}
               >
                 <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow border border-gray-300">
                   <div className="flex items-center gap-4">
@@ -212,7 +219,7 @@ export function UserDonations() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>
@@ -220,12 +227,27 @@ export function UserDonations() {
       {/* View All Link */}
       <div className="mt-6 text-center">
         <Link
-          href="/donations"
+          href="/sample/alldon"
           className="text-[#1C7D91] font-semibold hover:underline"
         >
           View All Donations →
         </Link>
       </div>
+
+      {/* Receipt Modal */}
+      {userDonations.map((donation) => {
+        const drive = allDrives.find((d) => d.driveId === donation.driveId);
+        if (!drive) return null;
+        return (
+          <DonationReceiptModal
+            key={donation.driveId}
+            open={open}
+            onOpenChange={setOpen}
+            donation={donation}
+            drive={drive}
+          />
+        );
+      })}
     </Card>
   );
 }

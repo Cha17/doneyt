@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -8,6 +10,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { allDrives, userDonations } from "@/data/allDrives";
 import { formatCurrency } from "@/utils/formatCurrency";
+import DonationReceiptModal from "../components/DonationReceiptModal";
+import { useState } from "react";
 
 export default function ProfilePage() {
   const totalDonations = userDonations.reduce<number>(
@@ -22,7 +26,8 @@ export default function ProfilePage() {
         <div className="max-w-7xl mx-auto px-6 py-12 w-full">
           <h1 className="text-4xl font-bold text-white text-center">Profile</h1>
         </div>
-
+        {/* <div className="max-w-7xl mx-auto px-6  w-full">
+         */}
         <div className="max-w-7xl mx-auto w-full">
           {/* Main Profile Card */}
           <div className="flex flex-col lg:flex-row gap-8 items-start">
@@ -74,25 +79,6 @@ export default function ProfilePage() {
                   <h2 className="text-lg font-bold text-black uppercase mb-4">
                     PERSONAL INFORMATION
                   </h2>
-
-                  {/* Profile Pic & Change Photo Button */}
-                  <div className="flex flex-col items-center md:items-center">
-                    <div className="w-56 h-56 bg-gray-300 rounded-full overflow-hidden mb-8">
-                      <Image
-                        src="/images/sample.png"
-                        alt="Profile"
-                        width={224}
-                        height={224}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-
-                    <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal w-full md:w-auto">
-                      CHANGE PHOTO
-                    </Button>
-                  </div>
-
-                  {/* Personal Information Form */}
                   <div className="flex flex-row gap-8">
                     <div className="flex-1">
                       <Label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -115,9 +101,9 @@ export default function ProfilePage() {
                       />
                     </div>
                   </div>
-                  {/* <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal">
+                  <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal">
                     SAVE
-                  </Button> */}
+                  </Button>
                   <div className="space-y-2">
                     <Label className="block text-sm font-semibold text-gray-700 mb-2">
                       Email
@@ -147,6 +133,21 @@ export default function ProfilePage() {
                     </Button>
                   </div>
                 </div>
+                <div className="flex flex-col items-center md:items-center">
+                  <div className="w-56 h-56 bg-gray-300 rounded-full overflow-hidden mb-8">
+                    <Image
+                      src="/images/sample.png"
+                      alt="Profile"
+                      width={224}
+                      height={224}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+
+                  <Button className="bg-[#032040]  text-white rounded-lg uppercase px-4 py-2 text-sm font-normal w-full md:w-auto">
+                    CHANGE PHOTO
+                  </Button>
+                </div>
               </div>
             </Card>
           </div>
@@ -158,32 +159,23 @@ export default function ProfilePage() {
 }
 
 export function UserDonations() {
+  const [open, setOpen] = useState(false);
+
   return (
     <Card className="bg-gray-200 rounded-lg shadow-md mb-8 p-8">
       <h2 className="text-lg font-bold text-black uppercase">MY DONATIONS</h2>
-      {/* <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-400">
-        <span className="text-sm font-semibold text-gray-700">
-          Total Donated
-        </span>
-        <span className="text-2xl font-bold text-black">
-          {formatCurrency(totalDonations)}
-        </span>
-      </div> */}
+
       {userDonations.length === 0 ? (
         <p className="text-gray-600 text-center py-8">
           You have not made any donations yet.
         </p>
       ) : (
         <div className="space-y-4">
-          {userDonations.map((donation) => {
+          {userDonations.slice(0, 3).map((donation) => {
             const drive = allDrives.find((d) => d.driveId === donation.driveId);
             if (!drive) return null;
             return (
-              <Link
-                key={donation.driveId}
-                href={`/drives/${donation.driveId}`}
-                className="block"
-              >
+              <div key={donation.driveId} className="block">
                 <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow border border-gray-300">
                   <div className="flex items-center gap-4">
                     <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
@@ -215,7 +207,7 @@ export function UserDonations() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>
@@ -229,6 +221,21 @@ export function UserDonations() {
           View All Donations →
         </Link>
       </div>
+
+      {/* Receipt Modal */}
+      {userDonations.map((donation) => {
+        const drive = allDrives.find((d) => d.driveId === donation.driveId);
+        if (!drive) return null;
+        return (
+          <DonationReceiptModal
+            key={donation.driveId}
+            open={open}
+            onOpenChange={setOpen}
+            donation={donation}
+            drive={drive}
+          />
+        );
+      })}
     </Card>
   );
 }
