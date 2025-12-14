@@ -65,7 +65,7 @@ export default function ProfilePage() {
               </Card>
               <UserDonations />
             </div>
-            <Card className="bg-gray-200 rounded-lg shadow-md mb-6 sm:mb-8 p-4 sm:p-6 md:p-8 w-full lg:w-auto">
+            <Card className="bg-gray-200 rounded-lg shadow-md mb-6 sm:mb-8 p-8 sm:p-4 md:p-6 w-full lg:w-auto">
               <div className="flex flex-col md:flex-row gap-6 sm:gap-8 md:gap-12">
                 {/* Left Column - Personal Information */}
                 <div className="flex-1 space-y-4 sm:space-y-6">
@@ -158,8 +158,8 @@ export function UserDonations() {
   const [open, setOpen] = useState(false);
 
   return (
-    <Card className="bg-gray-200 rounded-lg shadow-md mb-6 sm:mb-8 p-4 sm:p-6 md:p-8">
-      <h2 className="text-base sm:text-lg font-bold text-black uppercase mb-4 sm:mb-6">
+    <Card className="bg-gray-200 rounded-lg shadow-md p-4 sm:p-6 md:p-8">
+      <h2 className="text-lg font-bold text-black uppercase mb-4">
         MY DONATIONS
       </h2>
 
@@ -175,9 +175,10 @@ export function UserDonations() {
             return (
               <div key={donation.driveId} className="block">
                 <div className="bg-white rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow border border-gray-300">
-                  <div className="flex flex-col gap-3 sm:gap-4">
-                    {/* First Row: Image and Drive Info */}
-                    <div className="flex items-start gap-3 sm:gap-4">
+                  {/* Mobile: Two rows, Desktop: Three columns */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                    {/* First Row (Mobile) / Left Column (Desktop): Image and Drive Info */}
+                    <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
                       <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0">
                         <Image
                           src={drive.imageUrl}
@@ -187,6 +188,7 @@ export function UserDonations() {
                           className="object-cover w-full h-full"
                         />
                       </div>
+                      {/* Drive Name and Organization */}
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1">
                           {drive.title}
@@ -196,12 +198,12 @@ export function UserDonations() {
                         </p>
                       </div>
                     </div>
-                    {/* Second Row: Date and Amount */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs sm:text-sm text-gray-500">
+                    {/* Second Row (Mobile) / Right Column (Desktop): Amount and Date */}
+                    <div className="flex sm:flex-col sm:items-end items-center justify-between sm:justify-end shrink-0">
+                      <span className="text-xs sm:text-sm text-gray-500 sm:order-2">
                         {donation.date}
                       </span>
-                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#032040]">
+                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#032040] sm:mb-1 sm:order-1">
                         {formatCurrency(donation.amount)}
                       </span>
                     </div>

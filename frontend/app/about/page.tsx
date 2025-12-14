@@ -1,5 +1,6 @@
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import Image from "next/image";
 
 export default function AboutPage() {
   return (
@@ -51,10 +52,16 @@ export default function AboutPage() {
             {/* Community */}
             <div className="flex flex-col items-center justify-center">
               <div className="bg-[#1C7D91] rounded-full shadow-md flex flex-col items-center justify-center mx-auto mb-4 sm:mb-6 md:mb-8 w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 shrink-0">
-                <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-white mb-2 text-center px-2">
-                  Community
-                </h3>
+                <Image
+                  src="/images/community.png"
+                  alt="Community"
+                  width={100}
+                  height={100}
+                />
               </div>
+              <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-white mb-2 text-center px-2">
+                Community
+              </h3>
               <p className="text-gray-50 text-center text-xs sm:text-sm md:text-base px-20 sm:px-6 md:px-8">
                 We ensure all donation drives are verified and progress is
                 tracked openly.
@@ -63,10 +70,16 @@ export default function AboutPage() {
             {/* Transparency */}
             <div className="flex flex-col items-center justify-center">
               <div className="bg-[#1C7D91] rounded-full shadow-md flex flex-col items-center justify-center mx-auto mb-4 sm:mb-6 md:mb-8 w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 shrink-0">
-                <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-white mb-2 text-center px-2">
-                  Transparency
-                </h3>
+                <Image
+                  src="/images/transparency.png"
+                  alt="Transparency"
+                  width={100}
+                  height={100}
+                />
               </div>
+              <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-white mb-2 text-center px-2">
+                Transparency
+              </h3>
               <p className="text-gray-50 text-center text-xs sm:text-sm md:text-base px-20 sm:px-6 md:px-8">
                 We ensure all donation drives are verified and progress is
                 tracked openly.
@@ -75,10 +88,16 @@ export default function AboutPage() {
             {/* Impact */}
             <div className="flex flex-col items-center justify-center">
               <div className="bg-[#1C7D91] rounded-full shadow-md flex flex-col items-center justify-center mx-auto mb-4 sm:mb-6 md:mb-8 w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 shrink-0">
-                <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-white mb-2 text-center px-2">
-                  Impact
-                </h3>
+                <Image
+                  src="/images/impact.png"
+                  alt="Impact"
+                  width={100}
+                  height={100}
+                />
               </div>
+              <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-white mb-2 text-center px-2">
+                Impact
+              </h3>
               <p className="text-gray-50 text-center text-xs sm:text-sm md:text-base px-20 sm:px-6 md:px-8">
                 Every contribution, no matter the size, creates meaningful
                 change. Every peso counts.

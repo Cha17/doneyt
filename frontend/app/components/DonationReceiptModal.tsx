@@ -234,13 +234,13 @@ export default function DonationReceiptModal({
         </div>
 
         <DialogFooter>
-          <Button
+          {/* <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             className="bg-gray-200 text-gray-700 hover:bg-gray-300"
           >
             Close
-          </Button>
+          </Button> */}
           <Button
             onClick={handleDownload}
             className="bg-[#032040] text-white hover:bg-[#032040]/90"
