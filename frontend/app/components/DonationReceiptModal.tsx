@@ -174,12 +174,12 @@ export default function DonationReceiptModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>Donation Receipt</DialogTitle>
         </DialogHeader>
 
-        <div className="bg-white rounded-lg p-8 space-y-6">
+        <div className="bg-white rounded-lg px-4 py-8 space-y-6">
           {/* Header */}
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-[#032040] mb-2">DONEYT</h2>
@@ -204,13 +204,13 @@ export default function DonationReceiptModal({
             </div>
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-600">Donation Drive:</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-gray-900 text-right">
                 {drive.title}
               </p>
             </div>
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-600">Organization:</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-gray-900 text-right">
                 {drive.organization}
               </p>
             </div>
