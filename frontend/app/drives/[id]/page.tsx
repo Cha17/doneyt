@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { allDrives, Drive } from "@/data/allDrives";
 import NoDrivesFound from "@/app/components/NoDrivesFound";
 import Header from "@/app/components/Header";
@@ -21,7 +21,6 @@ import DonationFormModal from "@/app/components/DonationModal";
 export default function DriveDetailPage() {
   const params = useParams();
   const driveId = params?.id as string;
-  const router = useRouter();
 
   const drive = allDrives.find((d) => d.driveId === driveId);
 
@@ -42,9 +41,9 @@ export default function DriveDetailPage() {
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-tr from-[#012326] to-[#013e4a] font-sans dark:bg-black">
       <Header />
-      <main className="flex-1 pt-24 mx-12">
+      <main className="flex-1 pt-24 mx-6 sm:mx-8 md:mx-12 lg:mx-12">
         {/* Hero Banner */}
-        <div className="relative w-full h-[400px] mb-12">
+        <div className="relative w-full h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] mb-8 sm:mb-10 md:mb-12">
           <Image
             src={drive.imageUrl}
             alt={drive.title}
@@ -54,24 +53,28 @@ export default function DriveDetailPage() {
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-lg">
-            <div className="max-w-4xl mx-auto px-6 text-center text-white">
-              <h1 className="text-5xl font-bold mb-4">{drive.title}</h1>
-              <p className="text-2xl mb-6">{drive.organization}</p>
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center text-white">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4">
+                {drive.title}
+              </h1>
+              <p className="text-lg sm:text-xl md:text-2xl mb-4 sm:mb-6">
+                {drive.organization}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 flex flex-col gap-6 z-10">
+            <div className="sticky top-24 flex flex-col gap-4 sm:gap-6 z-10">
               {/* Circular Progress Card */}
-              <div className="bg-white rounded-lg shadow-lg p-8">
+              <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
                 <div className="flex flex-col items-center justify-center gap-4">
                   {/* Circular Progress + Raised */}
-                  <div className="relative flex items-center justify-center w-72 h-72">
+                  <div className="relative flex items-center justify-center w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72">
                     <svg
                       className="absolute top-0 left-0 w-full h-full"
                       viewBox="0 0 100 100"
@@ -113,15 +116,15 @@ export default function DriveDetailPage() {
                         );
                       })()}
                     </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-center px-4">
-                      <span className="text-3xl font-bold text-[#032040]">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-center px-2 sm:px-4">
+                      <span className="text-2xl sm:text-3xl font-bold text-[#032040]">
                         {getDriveProgress(
                           drive.currentAmount,
                           drive.targetAmount
                         )}
                         %
                       </span>
-                      <span className="text-sm font-normal text-gray-600">
+                      <span className="text-xs sm:text-sm font-normal text-gray-600">
                         {formattedCurrent({
                           currentAmount: drive.currentAmount,
                         } as Drive)}{" "}
@@ -134,7 +137,7 @@ export default function DriveDetailPage() {
                   </div>
                   {/* Donate Button */}
                   <Button
-                    className="w-full md:w-auto px-8 py-4 text-lg font-semibold bg-linear-to-r from-[#032040] via-[#1C7D91] to-[#7BAC6B] hover:opacity-90"
+                    className="w-full md:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold bg-linear-to-r from-[#032040] via-[#1C7D91] to-[#7BAC6B] hover:opacity-90"
                     onClick={() => setIsDonateOpen(true)}
                   >
                     DONATE NOW
@@ -180,8 +183,8 @@ export default function DriveDetailPage() {
               </div>
 
               {/* Drive Info Card */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex justify-center">
+              <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 flex justify-center">
                   Drive Information
                 </h3>
                 <div className="space-y-4">
@@ -214,19 +217,19 @@ export default function DriveDetailPage() {
             </div>
           </div>
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                 About This Drive
               </h2>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line">
                 {drive.description}
               </p>
             </div>
 
             {/* Gallery */}
             {drive.gallery && drive.gallery.length > 0 && (
-              <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Gallery
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
