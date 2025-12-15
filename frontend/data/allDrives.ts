@@ -211,8 +211,13 @@ export const allDrives: Drive[] = [
   },
 ];
 
+export interface UserDonation {
+  driveId: string;
+  amount: number;
+  date: string;
+}
 
-export const userDonations = [{
+export const userDonations: UserDonation[] = [{
   driveId: "1",
   amount: 500,
   date: "Dec 15, 2024",
