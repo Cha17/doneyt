@@ -14,18 +14,18 @@ datasource db {
 }
 
 model Drive {
-  id            String   @id @default(cuid())
+  id            String    @id @unique @default(dbgenerated("gen_random_uuid()"))
   title         String
   organization  String
   description   String
-  currentAmount Int      @default(0)
+  currentAmount Int       @default(0)
   targetAmount  Int?
-  status        String   @default("active")
+  status        String    @default("active")
   imageUrl      String
-  endDate       String?
+  endDate       DateTime?
   gallery       String[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
 
   donations Donation[]
 }
@@ -35,6 +35,8 @@ model Donation {
   driveId     String
   amount      Int
   dateDonated DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 
   drive Drive @relation(fields: [driveId], references: [id])
 }
