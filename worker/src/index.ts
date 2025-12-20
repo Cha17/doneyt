@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
-import { drives } from './db/schema';
-import { and, eq, ilike, or, desc } from 'drizzle-orm';
+import { donations, drives } from './db/schema';
+import { and, eq, ilike, or, desc, min } from 'drizzle-orm';
 
 export type Env = {
 	DATABASE_URL: string;
@@ -21,13 +21,28 @@ function parseIntParam(value: string | null, fallback: number) {
 	return Number.isFinite(n) ? n : fallback;
 }
 
-app.get('/', async (c) => {
-	const db = getDb(c.env.DATABASE_URL)
+function nonEmptyString(value: unknown): value is string {
+	return typeof value === 'string' && value.trim().length > 0;
+}
 
-	const Drivess = await db.select().from(drives);
-	return c.json(Drivess)
-})
+function isValidNumber(value: unknown): value is number {
+	return typeof value === 'number' && Number.isFinite(value) && value >= 1;
+}
 
+
+
+
+// ENDPOINTS
+
+// app.get('/', async (c) => {
+// 	const db = getDb(c.env.DATABASE_URL)
+
+// 	const Drivess = await db.select().from(drives);
+// 	return c.json(Drivess)
+// })
+
+
+// List all drives | with pagination, filtering, and searching
 app.get('/drives', async (c) => {
 	try {
 		const db = getDb(c.env.DATABASE_URL);
@@ -75,6 +90,8 @@ app.get('/drives', async (c) => {
   }
 });
 
+
+// Get a single drive by ID
 app.get('/drives/:id', async (c) => {
 	try {
 		const db = getDb(c.env.DATABASE_URL);
@@ -93,6 +110,143 @@ app.get('/drives/:id', async (c) => {
 
 		return c.json({drive: drive[0]}, 200);
 	} catch (error) {
+		return c.json({error: 'Internal server error'}, 500);
+	}
+})
+
+
+// Create a new drive
+app.post('/drives', async (c) => {
+	try {
+		const db = getDb(c.env.DATABASE_URL);
+
+		const body = await c.req.json();
+
+		const title = body?.title;
+		if (!nonEmptyString(title)) {
+			return c.json({error: 'Title is required'}, 400);
+		}
+
+		const organization = body?.organization;
+		if (!nonEmptyString(organization)) {
+			return c.json({error: 'Organization is required'}, 400);
+		}
+
+		const description = body?.description;
+		if (!nonEmptyString(description)) {
+			return c.json({error: 'Description is required'}, 400);
+		}
+
+		const imageUrl = body?.imageUrl;
+		if (!nonEmptyString(imageUrl)) {
+			return c.json({error: 'Image URL is required'}, 400);
+		}
+
+		let targetAmountValue: number | undefined = undefined;
+		if (body?.targetAmount !== undefined) {
+			if (typeof body.targetAmount !== 'number' || !isValidNumber(body.targetAmount)) {
+				return c.json({error: 'Target amount must be a positive number'}, 400);
+			}
+			targetAmountValue = body.targetAmount;
+		}
+
+		let statusValue: string ='active';
+		if (body?.status && typeof body.status === 'string' && body.status.trim()) {
+			statusValue = body.status.trim();
+		}
+
+		let endDateValue: Date | undefined = undefined;
+		if (body?.endDate !== undefined) {
+			const parsedDate = new Date(body.endDate);
+			if (Number.isNaN(parsedDate.getTime())) {
+				return c.json({error: 'Invalid end date'}, 400);
+			}
+			endDateValue = parsedDate;
+		}
+
+		let galleryValue: string[] | undefined = undefined;
+		if (body?.gallery !== undefined) {
+			if (!Array.isArray(body.gallery)) {
+				return c.json({error: 'Gallery must be an array of strings'}, 400);
+			}
+			galleryValue = body.gallery.filter((item: unknown) => nonEmptyString(item)).map((item: string) => item.trim());
+		}
+
+
+		const [drive] = await db.insert(drives).values({
+			title: title.trim(),
+			organization: organization.trim(),
+			description: description.trim(),
+			imageUrl: imageUrl.trim(),
+			targetAmount: targetAmountValue,
+			status: statusValue,
+			endDate: endDateValue,
+			gallery: galleryValue
+		}).returning();
+
+		return c.json(drive, 201)
+	} catch (error) {
+		console.error('Error creating drive:', error);
+		return c.json({error: 'Internal server error'}, 500);
+	}
+})
+
+// Submit a donation to a drive
+app.post('/donations', async (c) => {
+	try {
+		const db = getDb(c.env.DATABASE_URL);
+		const body = await c.req.json();
+
+		const driveIdParam = body?.driveId;
+		if (driveIdParam === undefined) {
+			return c.json({error: 'Drive ID is required'}, 400);
+		}
+
+		const driveId = typeof driveIdParam === 'string' ? Number.parseInt(driveIdParam, 10) : typeof driveIdParam === 'number' ? driveIdParam : null;
+		if (!Number.isFinite(driveId) || driveId === null) {
+			return c.json({error: 'Invalid drive ID'}, 400);
+		}
+
+		// TypeScript now knows driveId is a number after the null check
+		const validDriveId: number = driveId;
+
+		const amount = body?.amount;
+		if (!isValidNumber(amount)) {
+			return c.json({error: 'Amount must be a positive number'}, 400);
+		}
+
+		const [drive] = await db.select().from(drives).where(eq(drives.id, validDriveId)).limit(1);
+
+		if (!drive) {
+			return c.json({error: 'Drive not found'}, 404);
+		}
+
+    // Use a transaction for donation + updating currentAmount
+    const donation = await db.transaction(async (tx) => {
+		const [newDonation] = await tx
+		  .insert(donations)
+		  .values({
+			driveId: validDriveId,
+			amount,
+		  })
+		  .returning();
+  
+		// Ensure currentAmount not null
+		const currentAmount =
+		  typeof drive.currentAmount === "number" && !isNaN(drive.currentAmount)
+			? drive.currentAmount
+			: 0;
+		await tx
+		  .update(drives)
+		  .set({ currentAmount: currentAmount + amount })
+		  .where(eq(drives.id, validDriveId));
+		return newDonation;
+	  });
+  
+	  // Reply with new donation
+	  return c.json(donation, 201);
+	} catch (error) {
+		console.error('Error submitting donation:', error);
 		return c.json({error: 'Internal server error'}, 500);
 	}
 })
