@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Drive {
+  id            String    @id @unique @default(dbgenerated("gen_random_uuid()"))
+  title         String
+  organization  String
+  description   String
+  currentAmount Int       @default(0)
+  targetAmount  Int?
+  status        String    @default("active")
+  imageUrl      String
+  endDate       DateTime?
+  gallery       String[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+
+  donations Donation[]
+}
+
+model Donation {
+  id          String   @id @default(cuid())
+  driveId     String
+  amount      Int
+  dateDonated DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  drive Drive @relation(fields: [driveId], references: [id])
+}

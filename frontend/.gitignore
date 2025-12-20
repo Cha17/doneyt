@@ -42,3 +42,5 @@ next-env.d.ts
 
 agent/
 requirements/
+
+/app/generated/prisma
