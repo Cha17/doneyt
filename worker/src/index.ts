@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { donations, drives } from './db/schema';
-import { and, eq, ilike, or, desc, min } from 'drizzle-orm';
+import { and, eq, ilike, or, desc, min, inArray } from 'drizzle-orm';
 
 export type Env = {
 	DATABASE_URL: string;
@@ -15,7 +15,7 @@ function getDb(databaseUrl: string) {
 	return drizzle(sql);
 }
 
-function parseIntParam(value: string | null, fallback: number) {
+function parseIntParam(value: string | undefined, fallback: number) {
 	if(!value) return fallback;
 	const n = Number.parseInt(value, 10);
 	return Number.isFinite(n) ? n : fallback;
@@ -248,6 +248,64 @@ app.post('/donations', async (c) => {
 	} catch (error) {
 		console.error('Error submitting donation:', error);
 		return c.json({error: 'Internal server error'}, 500);
+	}
+})
+
+// Get donations | with pagination, filtering, and searching
+app.get('/doantions', async (c) => {
+	try {
+		const db = getDb(c.env.DATABASE_URL);
+
+		const driveIdParam = c.req.query('driveId');
+		const skip = Math.max(0, parseIntParam(c.req.query("skip"), 0));
+		const take = Math.min(100, Math.max(1, parseIntParam(c.req.query("take"), 10)));
+		const includeDrive = c.req.query('includeDrive') === 'true';
+
+		let whereCondition = undefined;
+
+		if (driveIdParam) {
+		const driveId = Number.parseInt(driveIdParam, 10);
+		if (!Number.isFinite(driveId)) {
+			return c.json({ error: "Invalid driveId" }, 400);
+		}
+		whereCondition = eq(donations.driveId, driveId);
+		}
+
+		const queryBuilder = whereCondition 
+		? db.select().from(donations).where(whereCondition)
+		: db.select().from(donations);
+		  
+		const donationsList = await queryBuilder
+			.orderBy(desc(donations.dateDonated))
+			.limit(take)
+			.offset(skip);
+
+		if (includeDrive && donationsList.length > 0) {
+			const driveIds = [
+			  ...new Set(donationsList.map((d) => d.driveId).filter((id) => id !== null)),
+			];
+			  
+			if (driveIds.length > 0) {
+			  const drivesList = await db
+				.select()
+				.from(drives)
+				.where(inArray(drives.id, driveIds));
+			  
+			  const drivesMap = new Map(drivesList.map((d) => [d.id, d]));
+			  
+			  const donationsWithDrives = donationsList.map((donation) => ({
+				...donation,
+				drive: donation.driveId ? drivesMap.get(donation.driveId) || null : null,
+			  }));
+			  
+			  return c.json(donationsWithDrives, 200);
+			}
+		  }
+
+		
+
+	} catch (error) {
+		
 	}
 })
 
