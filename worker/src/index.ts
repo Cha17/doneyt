@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { donations, drives } from './db/schema';
@@ -9,6 +10,13 @@ export type Env = {
 }
 
 const app = new Hono<{ Bindings: Env }>();
+
+// Enable CORS for all routes
+app.use('/*', cors({
+	origin: '*',
+	allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+	allowHeaders: ['Content-Type', 'Authorization'],
+}));
 
 function getDb(databaseUrl: string) {
 	const sql = neon(databaseUrl);
@@ -301,11 +309,9 @@ app.get('/doantions', async (c) => {
 			  return c.json(donationsWithDrives, 200);
 			}
 		  }
-
-		
-
 	} catch (error) {
-		
+		console.error("Error fetching donations:", error);
+		return c.json({ error: "Internal server error" }, 500);
 	}
 })
 

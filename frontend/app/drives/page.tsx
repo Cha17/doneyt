@@ -10,14 +10,27 @@ import Image from "next/image";
 import NoDrivesFound from "../components/NoDrivesFound";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { getDriveProgress } from "@/utils/formatCurrency";
+import { fetchDrives, transformDrive } from "@/lib/api";
 
 export default function DrivesPage() {
   const [filter, setfilter] = useState<string>("Active");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [drives, setDrives] = useState<
+    Array<{
+      driveId: number;
+      title: string;
+      organization: string;
+      description: string;
+      currentAmount: number;
+      targetAmount?: number;
+      imageUrl: string;
+    }>
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getFilteredDrives = () => {
-    let filtered = allDrives;
+    let filtered = drives;
 
     // Filter by search query
     if (searchQuery.trim()) {
@@ -53,6 +66,23 @@ export default function DrivesPage() {
 
     return filtered;
   };
+
+  useEffect(() => {
+    async function loadDrives() {
+      try {
+        setIsLoading(true);
+        const response = await fetchDrives({ take: 100 }); // Fetch more drives
+        const transformedDrives = response.drives.map(transformDrive);
+        setDrives(transformedDrives);
+      } catch (error) {
+        console.error("Failed to load drives:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadDrives();
+  }, []);
 
   const filteredDrives = getFilteredDrives();
   const ITEMS_PER_PAGE = 9;
@@ -123,8 +153,8 @@ export default function DrivesPage() {
             ) : (
               paginatedDrives.map((drive) => (
                 <DriveCard
-                  key={drive.driveId}
-                  driveId={drive.driveId}
+                  key={String(drive.driveId)}
+                  driveId={String(drive.driveId)}
                   title={drive.title}
                   organization={drive.organization}
                   description={drive.description}

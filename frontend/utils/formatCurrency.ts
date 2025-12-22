@@ -1,5 +1,3 @@
-import { Drive } from "@/data/allDrives";
-
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-PH", {
     style: "currency",
@@ -8,11 +6,11 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-export function formattedCurrent({ currentAmount }: Drive) {
+export function formattedCurrent({ currentAmount }: { currentAmount: number }) {
   return formatCurrency(currentAmount);
 }
 
-export function formattedTarget({ targetAmount }: Drive) {
+export function formattedTarget({ targetAmount }: { targetAmount?: number }) {
   return formatCurrency(targetAmount || 0);
 }
 

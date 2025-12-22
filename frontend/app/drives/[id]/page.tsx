@@ -1,7 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { allDrives, Drive } from "@/data/allDrives";
 import NoDrivesFound from "@/app/components/NoDrivesFound";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
@@ -17,12 +16,11 @@ import {
   DonationSuccessModal,
 } from "@/app/components/DonationModal";
 import DonationFormModal from "@/app/components/DonationModal";
+import { fetchDriveById, transformDrive } from "@/lib/api";
 
 export default function DriveDetailPage() {
   const params = useParams();
   const driveId = params?.id as string;
-
-  const drive = allDrives.find((d) => d.driveId === driveId);
 
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -33,6 +31,60 @@ export default function DriveDetailPage() {
     message: string;
   } | null>(null);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+
+  const [drive, setDrive] = useState<{
+    driveId: string;
+    title: string;
+    organization: string;
+    description: string;
+    currentAmount: number;
+    targetAmount?: number;
+    imageUrl: string;
+    endDate?: string;
+    gallery?: string[];
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDrive() {
+      try {
+        setIsLoading(true);
+        const driveIdNum = Number.parseInt(driveId, 10);
+        if (Number.isNaN(driveIdNum)) {
+          // Invalid ID, drive will stay null
+          setIsLoading(false);
+          return;
+        }
+        const response = await fetchDriveById(driveIdNum);
+        const transformedDrive = transformDrive(response.drive);
+        setDrive({
+          ...transformedDrive,
+          driveId: String(transformedDrive.driveId),
+        });
+      } catch (error) {
+        console.error("Failed to load drive:", error);
+        // Drive will stay null, showing NoDrivesFound
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (driveId) {
+      loadDrive();
+    }
+  }, [driveId]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-linear-to-tr from-[#012326] to-[#013e4a] font-sans dark:bg-black">
+        <Header />
+        <main className="flex-1 pt-24 flex items-center justify-center">
+          <div className="text-white text-xl">Loading drive...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!drive) {
     return <NoDrivesFound />;
@@ -127,11 +179,9 @@ export default function DriveDetailPage() {
                       <span className="text-xs sm:text-sm font-normal text-gray-600">
                         {formattedCurrent({
                           currentAmount: drive.currentAmount,
-                        } as Drive)}{" "}
+                        })}{" "}
                         /{" "}
-                        {formattedTarget({
-                          targetAmount: drive.targetAmount,
-                        } as Drive)}
+                        {formattedTarget({ targetAmount: drive.targetAmount })}
                       </span>
                     </div>
                   </div>
