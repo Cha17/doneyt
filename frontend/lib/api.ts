@@ -119,3 +119,39 @@ export async function fetchDriveById(id: number): Promise<DriveResponse> {
       gallery: apiDrive.gallery || undefined,
     };
   }
+
+
+
+// DONATION SUBMISSION
+export interface SubmitDonationRequest {
+    driveId: number;
+    amount: number;
+}
+
+export interface Donation {
+    id: number;
+    driveId: number;
+    amount: number;
+    dateDonated: string;
+}
+
+
+export async function submitDonation(donation: SubmitDonationRequest): Promise<Donation> {
+    const response = await fetch(`${API_URL}/donations`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            driveId: donation.driveId,
+            amount: donation.amount,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Failed to submit donation: ${response.statusText}`;
+        throw new Error(errorMessage); 
+    }
+    return await response.json();
+}
