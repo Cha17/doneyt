@@ -6,9 +6,9 @@ import React from "react";
 export default function Hero() {
   return (
     <section className="pt-32 py-20 max-w-7xl mx-auto px-6">
-      <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-30">
+      <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 md:gap-30">
         {/* Left Column */}
-        <div className="flex-1 w-full md:w-1/2 flex flex-col items-start md:text-left py-25">
+        <div className="flex-1 w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left py-6 md:py-25">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
             Make an Impact
           </h1>

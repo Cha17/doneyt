@@ -33,11 +33,11 @@ export default function FeaturedDrives() {
     loadDrives();
   }, []);
   return (
-    <section className="max-w-7xl mx-auto px-6 py-16">
+    <section className="max-w-7xl mx-auto px-6 py-4">
       <h2 className="text-3xl font-bold text-white mb-12 text-center">
         Featured Drives
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         {drives.map((drive) => (
           <DriveCard
             key={drive.driveId}

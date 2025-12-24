@@ -152,7 +152,21 @@ export default function DriveDetailPage() {
                       className="absolute top-0 left-0 w-full h-full"
                       viewBox="0 0 100 100"
                       aria-hidden="true"
+                      style={{ transform: "rotate(90deg)" }}
                     >
+                      <defs>
+                        <linearGradient
+                          id="progressGradient"
+                          x1="0%"
+                          y1="0%"
+                          x2="100%"
+                          y2="0%"
+                        >
+                          <stop offset="0%" stopColor="#032040" />
+                          <stop offset="50%" stopColor="#1C7D91" />
+                          <stop offset="100%" stopColor="#7BAC6B" />
+                        </linearGradient>
+                      </defs>
                       {/* Background ring */}
                       <circle
                         cx="50"
@@ -177,7 +191,7 @@ export default function DriveDetailPage() {
                             cy="50"
                             r={radius}
                             fill="none"
-                            stroke="#204378"
+                            stroke="url(#progressGradient)"
                             strokeWidth="8"
                             strokeDasharray={circumference}
                             strokeDashoffset={offset}
@@ -261,27 +275,40 @@ export default function DriveDetailPage() {
                   Drive Information
                 </h3>
                 <div className="space-y-4">
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Organizer</div>
-                    <div className="text-lg font-semibold text-gray-900">
-                      {drive.organization}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">
+                        Organizer
+                      </div>
+                      <div className="text-lg font-semibold text-gray-900">
+                        {drive.organization}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Progress</div>
-                    <div className="text-lg font-semibold text-gray-900">
-                      {getDriveProgress(
-                        drive.currentAmount,
-                        drive.targetAmount
-                      )}
-                      %
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">Progress</div>
+                      <div className="text-lg font-semibold text-gray-900">
+                        {getDriveProgress(
+                          drive.currentAmount,
+                          drive.targetAmount
+                        )}
+                        %
+                      </div>
                     </div>
                   </div>
                   {drive.endDate && (
                     <div>
                       <div className="text-sm text-gray-600 mb-1">End Date</div>
                       <div className="text-lg font-semibold text-gray-900">
-                        {drive.endDate}
+                        {drive.endDate
+                          ? new Date(drive.endDate).toLocaleDateString(
+                              undefined,
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }
+                            )
+                          : ""}
                       </div>
                     </div>
                   )}

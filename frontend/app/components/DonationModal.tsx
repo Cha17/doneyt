@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { submitDonation } from "@/lib/api";
 import NoDrivesFound from "./NoDrivesFound";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 interface DonationModalProps {
   open: boolean;
@@ -268,7 +269,9 @@ export function DonationReviewModal({
           </div>
           <div className="flex justify-between">
             <span className="font-medium text-gray-600">Amount</span>
-            <span className="font-semibold text-gray-900">{amount}</span>
+            <span className="font-semibold text-gray-900">
+              {formatCurrency(amount)}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="font-medium text-gray-600">Donor Name</span>
@@ -296,37 +299,37 @@ export function DonationReviewModal({
           <Button
             variant="outline"
             className="w-full sm:w-auto"
-            onClick={async () => {
-              setIsSubmitting(true);
-              setSubmitError(null);
+            // onClick={async () => {
+            //   setIsSubmitting(true);
+            //   setSubmitError(null);
 
-              try {
-                await submitDonation({
-                  driveId: driveId,
-                  amount: amount,
-                });
+            //   try {
+            //     await submitDonation({
+            //       driveId: driveId,
+            //       amount: amount,
+            //     });
 
-                if (onComplete) {
-                  onComplete();
-                }
+            //     if (onComplete) {
+            //       onComplete();
+            //     }
 
-                onOpenChange(false);
-              } catch (error) {
-                setSubmitError(
-                  error instanceof Error ? error.message : "An error occurred"
-                );
-                console.error("Donation submission error:", error);
-                <NoDrivesFound />;
-              } finally {
-                setIsSubmitting(false);
-              }
-            }}
-            // onClick={() => {
-            //   onOpenChange(false);
-            //   if (onGoBack) {
-            //     onGoBack();
+            //     onOpenChange(false);
+            //   } catch (error) {
+            //     setSubmitError(
+            //       error instanceof Error ? error.message : "An error occurred"
+            //     );
+            //     console.error("Donation submission error:", error);
+            //     <NoDrivesFound />;
+            //   } finally {
+            //     setIsSubmitting(false);
             //   }
             // }}
+            onClick={() => {
+              onOpenChange(false);
+              if (onGoBack) {
+                onGoBack();
+              }
+            }}
           >
             Go Back
           </Button>

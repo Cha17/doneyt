@@ -26,7 +26,7 @@ export default function DriveCard({
   imageUrl,
 }: Drive) {
   return (
-    <Card className="w-full sm:w-80 md:w-96 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-white border border-gray-200 pt-0 pb-4 sm:pb-6">
+    <Card className="w-full sm:w-80 md:w-96 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-white border border-gray-500 pt-0 pb-4 sm:pb-6">
       <div className="relative w-full h-40 sm:h-44 bg-gray-100">
         <Image
           src={imageUrl}
