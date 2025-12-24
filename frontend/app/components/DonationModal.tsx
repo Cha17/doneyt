@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
+import { submitDonation } from "@/lib/api";
+import NoDrivesFound from "./NoDrivesFound";
 
 interface DonationModalProps {
   open: boolean;
@@ -222,6 +224,8 @@ export default function DonationFormModal({
 interface DonationReviewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  driveId: number;
+
   driveName: string;
   amount: number;
   donorName: string;
@@ -234,6 +238,7 @@ interface DonationReviewModalProps {
 export function DonationReviewModal({
   open,
   onOpenChange,
+  driveId,
   driveName,
   amount,
   donorName,
@@ -242,6 +247,9 @@ export function DonationReviewModal({
   onGoBack,
   onComplete,
 }: DonationReviewModalProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px]">
@@ -288,27 +296,74 @@ export function DonationReviewModal({
           <Button
             variant="outline"
             className="w-full sm:w-auto"
-            onClick={() => {
-              onOpenChange(false);
-              if (onGoBack) {
-                onGoBack();
+            onClick={async () => {
+              setIsSubmitting(true);
+              setSubmitError(null);
+
+              try {
+                await submitDonation({
+                  driveId: driveId,
+                  amount: amount,
+                });
+
+                if (onComplete) {
+                  onComplete();
+                }
+
+                onOpenChange(false);
+              } catch (error) {
+                setSubmitError(
+                  error instanceof Error ? error.message : "An error occurred"
+                );
+                console.error("Donation submission error:", error);
+                <NoDrivesFound />;
+              } finally {
+                setIsSubmitting(false);
               }
             }}
+            // onClick={() => {
+            //   onOpenChange(false);
+            //   if (onGoBack) {
+            //     onGoBack();
+            //   }
+            // }}
           >
             Go Back
           </Button>
           <Button
             type="button"
             className="w-full sm:w-auto px-6 py-2 text-sm font-semibold"
-            onClick={() => {
-              if (onComplete) {
-                onComplete();
+            onClick={async () => {
+              setIsSubmitting(true);
+              setSubmitError(null);
+
+              try {
+                await submitDonation({
+                  driveId: driveId,
+                  amount: amount,
+                });
+
+                if (onComplete) {
+                  onComplete();
+                }
+
+                onOpenChange(false);
+              } catch (error) {
+                setSubmitError(
+                  error instanceof Error ? error.message : "An error occurred"
+                );
+                console.error("Donation submission error:", error);
+                <NoDrivesFound />;
+              } finally {
+                setIsSubmitting(false);
               }
-              onOpenChange(false);
             }}
           >
-            Complete Donation
+            {isSubmitting ? "Submitting..." : "Complete Donation"}
           </Button>
+          {submitError && (
+            <div className="text-red-500 text-sm mt-2">{submitError}</div>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

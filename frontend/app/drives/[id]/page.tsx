@@ -90,6 +90,27 @@ export default function DriveDetailPage() {
     return <NoDrivesFound />;
   }
 
+  const reloadDrive = async () => {
+    try {
+      const driveIdNum = Number.parseInt(driveId, 10);
+
+      if (Number.isNaN(driveIdNum)) {
+        return;
+      }
+
+      const response = await fetchDriveById(driveIdNum);
+      const transformedDrive = transformDrive(response.drive);
+
+      setDrive({
+        ...transformedDrive,
+        driveId: String(transformedDrive.driveId),
+      });
+    } catch (error) {
+      console.error("Failed to reload drive:", error);
+      <NoDrivesFound />;
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-tr from-[#012326] to-[#013e4a] font-sans dark:bg-black">
       <Header />
@@ -209,6 +230,7 @@ export default function DriveDetailPage() {
                   <DonationReviewModal
                     open={isReviewOpen}
                     onOpenChange={setIsReviewOpen}
+                    driveId={Number.parseInt(drive.driveId, 10)}
                     driveName={drive.title}
                     amount={reviewData?.amount || 0}
                     donorName={reviewData?.donorName || ""}
@@ -218,7 +240,8 @@ export default function DriveDetailPage() {
                       setIsReviewOpen(false);
                       setIsDonateOpen(true);
                     }}
-                    onComplete={() => {
+                    onComplete={async () => {
+                      await reloadDrive();
                       setIsSuccessOpen(true);
                     }}
                   />
@@ -226,7 +249,7 @@ export default function DriveDetailPage() {
                     <DonationSuccessModal
                       open={isSuccessOpen}
                       onOpenChange={setIsSuccessOpen}
-                      donorName={reviewData.donorName}
+                      donorName={reviewData?.donorName || ""}
                     />
                   )}
                 </div>

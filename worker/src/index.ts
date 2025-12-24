@@ -34,7 +34,7 @@ function nonEmptyString(value: unknown): value is string {
 }
 
 function isValidNumber(value: unknown): value is number {
-	return typeof value === 'number' && Number.isFinite(value) && value >= 1;
+	return typeof value === 'number' && Number.isFinite(value) && value > 0;
 }
 
 
@@ -203,7 +203,16 @@ app.post('/drives', async (c) => {
 app.post('/donations', async (c) => {
 	try {
 		const db = getDb(c.env.DATABASE_URL);
-		const body = await c.req.json();
+
+		// Read and validate JSON body early so we can return a 400 instead of 500 on bad JSON
+		const rawBody = await c.req.text();
+		let body: { driveId?: unknown; amount?: unknown };
+		try {
+			body = rawBody ? JSON.parse(rawBody) : {};
+		} catch (err) {
+			console.error('Invalid JSON body for /donations:', rawBody, err);
+			return c.json({ error: 'Invalid JSON payload' }, 400);
+		}
 
 		const driveIdParam = body?.driveId;
 		if (driveIdParam === undefined) {
@@ -229,30 +238,28 @@ app.post('/donations', async (c) => {
 			return c.json({error: 'Drive not found'}, 404);
 		}
 
-    // Use a transaction for donation + updating currentAmount
-    const donation = await db.transaction(async (tx) => {
-		const [newDonation] = await tx
-		  .insert(donations)
-		  .values({
-			driveId: validDriveId,
-			amount,
-		  })
-		  .returning();
-  
-		// Ensure currentAmount not null
+		// Insert donation first (neon-http does not support transactions)
+		const [newDonation] = await db
+			.insert(donations)
+			.values({
+				driveId: validDriveId,
+				amount,
+			})
+			.returning();
+
+		// Safely compute and persist new total
 		const currentAmount =
-		  typeof drive.currentAmount === "number" && !isNaN(drive.currentAmount)
-			? drive.currentAmount
-			: 0;
-		await tx
-		  .update(drives)
-		  .set({ currentAmount: currentAmount + amount })
-		  .where(eq(drives.id, validDriveId));
-		return newDonation;
-	  });
-  
-	  // Reply with new donation
-	  return c.json(donation, 201);
+			typeof drive.currentAmount === "number" && !isNaN(drive.currentAmount)
+				? drive.currentAmount
+				: 0;
+
+		await db
+			.update(drives)
+			.set({ currentAmount: currentAmount + amount })
+			.where(eq(drives.id, validDriveId));
+
+		// Reply with new donation
+		return c.json(newDonation, 201);
 	} catch (error) {
 		console.error('Error submitting donation:', error);
 		return c.json({error: 'Internal server error'}, 500);

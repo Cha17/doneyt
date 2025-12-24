@@ -8,6 +8,27 @@
       "when": 1766202558963,
       "tag": "0000_amazing_mesmero",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766500206551,
+      "tag": "0001_faithful_mathemanic",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766500991576,
+      "tag": "0002_pink_rocket_racer",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1766502604585,
+      "tag": "0003_mixed_the_anarchist",
+      "breakpoints": true
     }
   ]
 }
