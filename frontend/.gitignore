@@ -44,3 +44,4 @@ agent/
 requirements/
 
 /app/generated/prisma
+/app/sample/
