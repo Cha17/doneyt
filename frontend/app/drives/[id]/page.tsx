@@ -17,6 +17,7 @@ import {
 } from "@/app/components/DonationModal";
 import DonationFormModal from "@/app/components/DonationModal";
 import { fetchDriveById, transformDrive } from "@/lib/api";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 export default function DriveDetailPage() {
   const params = useParams();
@@ -44,6 +45,9 @@ export default function DriveDetailPage() {
     gallery?: string[];
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     async function loadDrive() {
@@ -73,6 +77,35 @@ export default function DriveDetailPage() {
       loadDrive();
     }
   }, [driveId]);
+
+  // Reset gallery index when drive changes
+  useEffect(() => {
+    if (drive?.gallery) {
+      setGalleryIndex(0);
+    }
+  }, [drive?.gallery]);
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (!lightboxOpen || !drive?.gallery) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setLightboxOpen(false);
+      } else if (e.key === "ArrowLeft") {
+        setLightboxIndex(
+          lightboxIndex === 0 ? drive.gallery!.length - 1 : lightboxIndex - 1
+        );
+      } else if (e.key === "ArrowRight") {
+        setLightboxIndex(
+          lightboxIndex === drive.gallery!.length - 1 ? 0 : lightboxIndex + 1
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxOpen, lightboxIndex, drive?.gallery]);
 
   if (isLoading) {
     return (
@@ -332,22 +365,180 @@ export default function DriveDetailPage() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Gallery
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {drive.gallery.map((imageUrl, index) => (
+                <div className="relative">
+                  {/* Carousel Container */}
+                  <div className="relative overflow-hidden rounded-lg">
                     <div
-                      key={index}
-                      className="relative aspect-square rounded-lg overflow-hidden"
+                      className="flex transition-transform duration-300 ease-in-out"
+                      style={{
+                        transform: `translateX(-${galleryIndex * 100}%)`,
+                      }}
                     >
-                      <Image
-                        src={imageUrl}
-                        alt={`${drive.title} - Image ${index + 1}`}
-                        fill
-                        className="object-cover hover:scale-105 transition-transform cursor-pointer"
-                        sizes="(max-width: 768px) 50vw, 33vw"
-                      />
+                      {drive.gallery.map((imageUrl, index) => (
+                        <div
+                          key={index}
+                          className="relative w-full shrink-0 aspect-video"
+                        >
+                          <Image
+                            src={imageUrl}
+                            alt={`${drive.title} - Image ${index + 1}`}
+                            fill
+                            className="object-cover cursor-pointer"
+                            sizes="100vw"
+                            onClick={() => {
+                              setLightboxIndex(index);
+                              setLightboxOpen(true);
+                            }}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Navigation Arrows */}
+                  {drive.gallery.length > 1 && (
+                    <>
+                      <button
+                        onClick={() =>
+                          setGalleryIndex(
+                            galleryIndex === 0
+                              ? drive.gallery!.length - 1
+                              : galleryIndex - 1
+                          )
+                        }
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() =>
+                          setGalleryIndex(
+                            galleryIndex === drive.gallery!.length - 1
+                              ? 0
+                              : galleryIndex + 1
+                          )
+                        }
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
+                        aria-label="Next image"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
+
+                  {/* Dots Indicator */}
+                  {drive.gallery.length > 1 && (
+                    <div className="flex justify-center gap-2 mt-4">
+                      {drive.gallery.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setGalleryIndex(index)}
+                          className={`w-2 h-2 rounded-full transition-colors ${
+                            index === galleryIndex
+                              ? "bg-[#032040]"
+                              : "bg-gray-300"
+                          }`}
+                          aria-label={`Go to image ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* Thumbnail Grid */}
+                {drive.gallery.length > 1 && (
+                  <div className="grid grid-cols-4 md:grid-cols-6 gap-2 mt-4">
+                    {drive.gallery.map((imageUrl, index) => (
+                      <div
+                        key={index}
+                        className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
+                          index === galleryIndex
+                            ? "border-[#032040]"
+                            : "border-transparent opacity-70 hover:opacity-100"
+                        }`}
+                        onClick={() => setGalleryIndex(index)}
+                      >
+                        <Image
+                          src={imageUrl}
+                          alt={`${drive.title} - Thumbnail ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 25vw, 16vw"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Lightbox Modal */}
+            {lightboxOpen && drive.gallery && (
+              <div
+                className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+                onClick={() => setLightboxOpen(false)}
+              >
+                <button
+                  onClick={() => setLightboxOpen(false)}
+                  className="absolute top-4 right-4 text-white hover:text-gray-300 z-10 bg-black/50 rounded-full p-2 transition-colors"
+                  aria-label="Close lightbox"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+
+                {drive.gallery.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex(
+                          lightboxIndex === 0
+                            ? drive.gallery!.length - 1
+                            : lightboxIndex - 1
+                        );
+                      }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10 bg-black/50 rounded-full p-3 transition-colors"
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex(
+                          lightboxIndex === drive.gallery!.length - 1
+                            ? 0
+                            : lightboxIndex + 1
+                        );
+                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10 bg-black/50 rounded-full p-3 transition-colors"
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </>
+                )}
+
+                <div
+                  className="relative max-w-7xl max-h-[90vh] w-full h-full"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Image
+                    src={drive.gallery[lightboxIndex]}
+                    alt={`${drive.title} - Image ${lightboxIndex + 1}`}
+                    fill
+                    className="object-contain"
+                    sizes="100vw"
+                    priority
+                  />
+                </div>
+
+                {drive.gallery.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm">
+                    {lightboxIndex + 1} / {drive.gallery.length}
+                  </div>
+                )}
               </div>
             )}
           </div>
