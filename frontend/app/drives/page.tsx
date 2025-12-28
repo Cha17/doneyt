@@ -58,10 +58,26 @@ export default function DrivesPage() {
         );
         return progress >= 80 && progress < 100;
       });
-    } else if (filter === "Popular") {
-      filtered = [...filtered].sort(
-        (a, b) => b.currentAmount - a.currentAmount
-      );
+    } else if (filter === "Needs Support") {
+      filtered = filtered
+        .filter((drive) => {
+          const progress = getDriveProgress(
+            drive.currentAmount,
+            drive.targetAmount || 0
+          );
+          return progress < 30 && progress < 100; // Drives with less than 30% progress
+        })
+        .sort((a, b) => {
+          const progressA = getDriveProgress(
+            a.currentAmount,
+            a.targetAmount || 0
+          );
+          const progressB = getDriveProgress(
+            b.currentAmount,
+            b.targetAmount || 0
+          );
+          return progressA - progressB; // Sort by lowest progress first
+        });
     }
 
     return filtered;
@@ -136,14 +152,14 @@ export default function DrivesPage() {
               Ending Soon
             </Button>
             <Button
-              onClick={() => setfilter("Popular")}
+              onClick={() => setfilter("Needs Support")}
               className={
-                filter === "Popular"
+                filter === "Needs Support"
                   ? "bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
                   : "bg-transparent text-gray-100 border border-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 hover:text-gray-700 transition-colors"
               }
             >
-              Popular
+              Needs Support
             </Button>
           </div>
           {/* Drives Section */}
