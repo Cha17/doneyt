@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import { allDrives } from "@/data/allDrives";
 import { Button } from "@/components/ui/button";
 import DriveCard from "../components/DriveCard";
+import DriveCardSkeleton from "../components/DriveCardSkeleton";
 import Image from "next/image";
 import NoDrivesFound from "../components/NoDrivesFound";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
@@ -48,7 +49,8 @@ export default function DrivesPage() {
           drive.currentAmount,
           drive.targetAmount || 0
         );
-        return progress < 100;
+        // Include drives without target (null) or with progress < 100
+        return progress === null || progress < 100;
       });
     } else if (filter === "Ending Soon") {
       filtered = filtered.filter((drive) => {
@@ -56,12 +58,34 @@ export default function DrivesPage() {
           drive.currentAmount,
           drive.targetAmount || 0
         );
-        return progress >= 80 && progress < 100;
+        // Only drives with target and progress >= 80% and < 100%
+        return progress !== null && progress >= 80 && progress < 100;
       });
-    } else if (filter === "Popular") {
-      filtered = [...filtered].sort(
-        (a, b) => b.currentAmount - a.currentAmount
-      );
+    } else if (filter === "Needs Support") {
+      filtered = filtered
+        .filter((drive) => {
+          const progress = getDriveProgress(
+            drive.currentAmount,
+            drive.targetAmount || 0
+          );
+          // Include drives without target or with progress < 30%
+          return progress === null || (progress < 30 && progress < 100);
+        })
+        .sort((a, b) => {
+          const progressA = getDriveProgress(
+            a.currentAmount,
+            a.targetAmount || 0
+          );
+          const progressB = getDriveProgress(
+            b.currentAmount,
+            b.targetAmount || 0
+          );
+          // Drives without target go first, then sort by lowest progress
+          if (progressA === null && progressB === null) return 0;
+          if (progressA === null) return -1;
+          if (progressB === null) return 1;
+          return progressA - progressB;
+        });
     }
 
     return filtered;
@@ -136,19 +160,24 @@ export default function DrivesPage() {
               Ending Soon
             </Button>
             <Button
-              onClick={() => setfilter("Popular")}
+              onClick={() => setfilter("Needs Support")}
               className={
-                filter === "Popular"
+                filter === "Needs Support"
                   ? "bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
                   : "bg-transparent text-gray-100 border border-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 hover:text-gray-700 transition-colors"
               }
             >
-              Popular
+              Needs Support
             </Button>
           </div>
           {/* Drives Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-16 justify-items-center">
-            {filteredDrives.length === 0 ? (
+            {isLoading ? (
+              // Show skeleton loaders while loading
+              Array.from({ length: 9 }).map((_, index) => (
+                <DriveCardSkeleton key={index} />
+              ))
+            ) : filteredDrives.length === 0 ? (
               <NoDrivesFound />
             ) : (
               paginatedDrives.map((drive) => (
@@ -166,43 +195,47 @@ export default function DrivesPage() {
             )}
           </div>
           {/* Pagination */}
-          <div className="flex justify-center items-center gap-2 mt-12 mb-8">
-            <Button
-              onClick={() => setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeftIcon className="w-4 h-4" />
-            </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .slice(
-                Math.max(0, Math.min(totalPages - 5, currentPage - 3)),
-                Math.max(5, Math.min(totalPages, currentPage + 2))
-              )
-              .map((pageNumber) => (
+          {filteredDrives.length > 0 && (
+            <>
+              <div className="flex justify-center items-center gap-2 mt-12 mb-8">
                 <Button
-                  key={pageNumber}
-                  onClick={() => setCurrentPage(pageNumber)}
-                  className={
-                    currentPage === pageNumber
-                      ? "bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                      : "px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                  }
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {pageNumber}
+                  <ChevronLeftIcon className="w-4 h-4" />
                 </Button>
-              ))}
-            <Button
-              onClick={() => setCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRightIcon className="w-4 h-4" />
-            </Button>
-          </div>
-          <div className="flex justify-center items-center gap-2 mb-8 text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
-          </div>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .slice(
+                    Math.max(0, Math.min(totalPages - 5, currentPage - 3)),
+                    Math.max(5, Math.min(totalPages, currentPage + 2))
+                  )
+                  .map((pageNumber) => (
+                    <Button
+                      key={pageNumber}
+                      onClick={() => setCurrentPage(pageNumber)}
+                      className={
+                        currentPage === pageNumber
+                          ? "bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                          : "px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                      }
+                    >
+                      {pageNumber}
+                    </Button>
+                  ))}
+                <Button
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRightIcon className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex justify-center items-center gap-2 mb-8 text-sm text-gray-600">
+                Page {currentPage} of {totalPages}
+              </div>
+            </>
+          )}
         </div>
       </main>
       <Footer />
