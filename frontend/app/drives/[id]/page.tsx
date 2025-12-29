@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import NoDrivesFound from "@/app/components/NoDrivesFound";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import DriveDetailSkeleton from "@/app/components/DriveDetailSkeleton";
 import Image from "next/image";
 import {
   formattedCurrent,
@@ -111,9 +112,7 @@ export default function DriveDetailPage() {
     return (
       <div className="min-h-screen flex flex-col bg-linear-to-tr from-[#012326] to-[#013e4a] font-sans dark:bg-black">
         <Header />
-        <main className="flex-1 pt-24 flex items-center justify-center">
-          <div className="text-white text-xl">Loading drive...</div>
-        </main>
+        <DriveDetailSkeleton />
         <Footer />
       </div>
     );

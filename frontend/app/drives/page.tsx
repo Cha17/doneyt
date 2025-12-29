@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import { allDrives } from "@/data/allDrives";
 import { Button } from "@/components/ui/button";
 import DriveCard from "../components/DriveCard";
+import DriveCardSkeleton from "../components/DriveCardSkeleton";
 import Image from "next/image";
 import NoDrivesFound from "../components/NoDrivesFound";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
@@ -171,7 +172,12 @@ export default function DrivesPage() {
           </div>
           {/* Drives Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-16 justify-items-center">
-            {filteredDrives.length === 0 ? (
+            {isLoading ? (
+              // Show skeleton loaders while loading
+              Array.from({ length: 9 }).map((_, index) => (
+                <DriveCardSkeleton key={index} />
+              ))
+            ) : filteredDrives.length === 0 ? (
               <NoDrivesFound />
             ) : (
               paginatedDrives.map((drive) => (
