@@ -215,6 +215,25 @@ export default function DriveDetailPage() {
                           drive.currentAmount,
                           drive.targetAmount
                         );
+                        if (progress === null) {
+                          // Show a pulsing ring for ongoing drives without target
+                          const radius = 44;
+                          const circumference = 2 * Math.PI * radius;
+                          return (
+                            <circle
+                              cx="50"
+                              cy="50"
+                              r={radius}
+                              fill="none"
+                              stroke="url(#progressGradient)"
+                              strokeWidth="8"
+                              strokeDasharray={circumference}
+                              strokeDashoffset={circumference * 0.25}
+                              strokeLinecap="round"
+                              className="opacity-50 animate-pulse"
+                            />
+                          );
+                        }
                         const radius = 44;
                         const circumference = 2 * Math.PI * radius;
                         const offset = circumference * (1 - progress / 100);
@@ -237,20 +256,41 @@ export default function DriveDetailPage() {
                       })()}
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-center px-2 sm:px-4">
-                      <span className="text-2xl sm:text-3xl font-bold text-[#032040]">
-                        {getDriveProgress(
-                          drive.currentAmount,
-                          drive.targetAmount
-                        )}
-                        %
-                      </span>
-                      <span className="text-xs sm:text-sm font-normal text-gray-600">
-                        {formattedCurrent({
-                          currentAmount: drive.currentAmount,
-                        })}{" "}
-                        /{" "}
-                        {formattedTarget({ targetAmount: drive.targetAmount })}
-                      </span>
+                      {getDriveProgress(
+                        drive.currentAmount,
+                        drive.targetAmount
+                      ) !== null ? (
+                        <>
+                          <span className="text-2xl sm:text-3xl font-bold text-[#032040]">
+                            {getDriveProgress(
+                              drive.currentAmount,
+                              drive.targetAmount
+                            )}
+                            %
+                          </span>
+                          <span className="text-xs sm:text-sm font-normal text-gray-600">
+                            {formattedCurrent({
+                              currentAmount: drive.currentAmount,
+                            })}{" "}
+                            /{" "}
+                            {formattedTarget({
+                              targetAmount: drive.targetAmount,
+                            })}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-2xl sm:text-3xl font-bold text-[#032040]">
+                            Ongoing
+                          </span>
+                          <span className="text-xs sm:text-sm font-normal text-gray-600">
+                            {formattedCurrent({
+                              currentAmount: drive.currentAmount,
+                            })}{" "}
+                            raised
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                   {/* Donate Button */}
@@ -323,8 +363,17 @@ export default function DriveDetailPage() {
                         {getDriveProgress(
                           drive.currentAmount,
                           drive.targetAmount
+                        ) !== null ? (
+                          <>
+                            {getDriveProgress(
+                              drive.currentAmount,
+                              drive.targetAmount
+                            )}
+                            %
+                          </>
+                        ) : (
+                          <span className="text-gray-600">Ongoing</span>
                         )}
-                        %
                       </div>
                     </div>
                   </div>

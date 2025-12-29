@@ -48,7 +48,8 @@ export default function DrivesPage() {
           drive.currentAmount,
           drive.targetAmount || 0
         );
-        return progress < 100;
+        // Include drives without target (null) or with progress < 100
+        return progress === null || progress < 100;
       });
     } else if (filter === "Ending Soon") {
       filtered = filtered.filter((drive) => {
@@ -56,7 +57,8 @@ export default function DrivesPage() {
           drive.currentAmount,
           drive.targetAmount || 0
         );
-        return progress >= 80 && progress < 100;
+        // Only drives with target and progress >= 80% and < 100%
+        return progress !== null && progress >= 80 && progress < 100;
       });
     } else if (filter === "Needs Support") {
       filtered = filtered
@@ -65,7 +67,8 @@ export default function DrivesPage() {
             drive.currentAmount,
             drive.targetAmount || 0
           );
-          return progress < 30 && progress < 100; // Drives with less than 30% progress
+          // Include drives without target or with progress < 30%
+          return progress === null || (progress < 30 && progress < 100);
         })
         .sort((a, b) => {
           const progressA = getDriveProgress(
@@ -76,7 +79,11 @@ export default function DrivesPage() {
             b.currentAmount,
             b.targetAmount || 0
           );
-          return progressA - progressB; // Sort by lowest progress first
+          // Drives without target go first, then sort by lowest progress
+          if (progressA === null && progressB === null) return 0;
+          if (progressA === null) return -1;
+          if (progressB === null) return 1;
+          return progressA - progressB;
         });
     }
 

@@ -50,21 +50,34 @@ export default function DriveCard({
       <CardContent className="px-4 sm:px-6">
         <div className="flex justify-between items-center mb-2 text-xs sm:text-sm text-gray-700">
           <span className="pr-2 min-w-0">
-            {formattedCurrent({ currentAmount } as Drive)} /{" "}
-            {formattedTarget({ targetAmount } as Drive)}
+            {formattedCurrent({ currentAmount } as Drive)}
+            {formattedTarget({ targetAmount } as Drive) && (
+              <> / {formattedTarget({ targetAmount } as Drive)}</>
+            )}
           </span>
           <span className="shrink-0">
-            {getDriveProgress(currentAmount, targetAmount)}%
+            {getDriveProgress(currentAmount, targetAmount) !== null ? (
+              <>{getDriveProgress(currentAmount, targetAmount)}%</>
+            ) : (
+              <span className="text-gray-500">Ongoing</span>
+            )}
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5 sm:h-3 mt-2 mb-2">
-          <div
-            className="bg-linear-to-r from-[#032040] via-[#1C7D91] to-[#7BAC6B] h-2.5 sm:h-3 rounded-full transition-all"
-            style={{
-              width: `${getDriveProgress(currentAmount, targetAmount)}%`,
-            }}
-          />
-        </div>
+        {getDriveProgress(currentAmount, targetAmount) !== null ? (
+          <div className="w-full bg-gray-200 rounded-full h-2.5 sm:h-3 mt-2 mb-2">
+            <div
+              className="bg-linear-to-r from-[#032040] via-[#1C7D91] to-[#7BAC6B] h-2.5 sm:h-3 rounded-full transition-all"
+              style={{
+                width: `${getDriveProgress(currentAmount, targetAmount)}%`,
+              }}
+            />
+          </div>
+        ) : (
+          <div className="w-full bg-gray-200 rounded-full h-2.5 sm:h-3 mt-2 mb-2 relative overflow-hidden">
+            <div className="bg-linear-to-r from-[#032040] via-[#1C7D91] to-[#7BAC6B] h-2.5 sm:h-3 rounded-full w-full opacity-50" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+          </div>
+        )}
       </CardContent>
       <CardFooter className="px-4 sm:px-6">
         <Link href={`/drives/${driveId}`} className="w-full">
