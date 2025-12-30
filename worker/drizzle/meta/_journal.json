@@ -29,6 +29,13 @@
       "when": 1766502604585,
       "tag": "0003_mixed_the_anarchist",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1767098819630,
+      "tag": "0004_cuddly_micromacro",
+      "breakpoints": true
     }
   ]
 }
