@@ -7,6 +7,10 @@ import { and, eq, ilike, or, desc, min, inArray } from 'drizzle-orm';
 
 export type Env = {
 	DATABASE_URL: string;
+	BETTER_AUTH_SECRET: string;
+	BETTER_AUTH_URL: string;
+	GOOGLE_CLIENT_ID?: string;
+	GOOGLE_CLIENT_SECRET?: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();
