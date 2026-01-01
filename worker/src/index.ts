@@ -4,6 +4,7 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { donations, drives } from './db/schema';
 import { and, eq, ilike, or, desc, min, inArray } from 'drizzle-orm';
+import { auth } from './lib/auth';
 
 export type Env = {
 	DATABASE_URL: string;
@@ -21,6 +22,18 @@ app.use('/*', cors({
 	allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 	allowHeaders: ['Content-Type', 'Authorization'],
 }));
+
+app.all("api/auth/*", async (c) => {
+	const createAuth = auth(
+		c.env.DATABASE_URL,
+		c.env.BETTER_AUTH_SECRET,
+		c.env.BETTER_AUTH_URL,
+		c.env.GOOGLE_CLIENT_ID,
+		c.env.GOOGLE_CLIENT_SECRET,
+	);
+	return auth.handler(c.req.raw);
+})
+
 
 function getDb(databaseUrl: string) {
 	const sql = neon(databaseUrl);
@@ -42,6 +55,34 @@ function isValidNumber(value: unknown): value is number {
 }
 
 
+async function requireAuth(c: Context<{ Bindings: Env}>) {
+	const authHeader = c.req.header("Authorization";)
+
+	if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    // Create auth instance to validate session
+    const auth = createAuth(
+      c.env.DATABASE_URL,
+      c.env.BETTER_AUTH_SECRET,
+      c.env.BETTER_AUTH_URL,
+      c.env.GOOGLE_CLIENT_ID,
+      c.env.GOOGLE_CLIENT_SECRET
+    );
+    
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    
+    if (!session) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    return session;
+  } catch (error) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+}
 
 
 // ENDPOINTS
@@ -206,6 +247,16 @@ app.post('/drives', async (c) => {
 // Submit a donation to a drive
 app.post('/donations', async (c) => {
 	try {
+		// Require authentication
+		const session = await requireAuth(c);
+		
+		// If requireAuth returns a Response (error), return it
+		if (session instanceof Response) {
+		return session;
+		}
+
+		// Now you have the authenticated user
+		const userId = session.user.id;
 		const db = getDb(c.env.DATABASE_URL);
 
 		// Read and validate JSON body early so we can return a 400 instead of 500 on bad JSON
@@ -248,6 +299,7 @@ app.post('/donations', async (c) => {
 			.values({
 				driveId: validDriveId,
 				amount,
+				userId: userId,
 			})
 			.returning();
 
