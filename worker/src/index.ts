@@ -1,10 +1,13 @@
-import { Hono } from 'hono';
+import { Context, Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { donations, drives } from './db/schema';
 import { and, eq, ilike, or, desc, min, inArray } from 'drizzle-orm';
-import { auth } from './lib/auth';
+import { createAuth } from './auth';
+
+
+
 
 export type Env = {
 	DATABASE_URL: string;
@@ -12,27 +15,59 @@ export type Env = {
 	BETTER_AUTH_URL: string;
 	GOOGLE_CLIENT_ID?: string;
 	GOOGLE_CLIENT_SECRET?: string;
-}
-
-const app = new Hono<{ Bindings: Env }>();
-
-// Enable CORS for all routes
-app.use('/*', cors({
+  }
+  
+  const app = new Hono<{ Bindings: Env }>();
+  
+  // Enable CORS for all routes
+  app.use('/*', cors({
 	origin: '*',
 	allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 	allowHeaders: ['Content-Type', 'Authorization'],
-}));
+  }));
+  
+  // Mount BetterAuth routes
+  app.all("/api/auth/*", async (c) => {
+	const authInstance = createAuth(
+	  c.env.DATABASE_URL,
+	  c.env.BETTER_AUTH_SECRET,
+	  c.env.BETTER_AUTH_URL,
+	  c.env.GOOGLE_CLIENT_ID,
+	  c.env.GOOGLE_CLIENT_SECRET
+	);
+	return authInstance.handler(c.req.raw);
+  });
+  
 
-app.all("api/auth/*", async (c) => {
-	const createAuth = auth(
+async function requireAuth(c: Context<{ Bindings: Env }>) {
+	const authHeader = c.req.header("Authorization");
+	
+	if (!authHeader || !authHeader.startsWith("Bearer ")) {
+	  return c.json({ error: "Unauthorized" }, 401);
+	}
+  
+	try {
+	  // Create auth instance to validate session
+	  const authInstance = createAuth(
 		c.env.DATABASE_URL,
 		c.env.BETTER_AUTH_SECRET,
 		c.env.BETTER_AUTH_URL,
 		c.env.GOOGLE_CLIENT_ID,
-		c.env.GOOGLE_CLIENT_SECRET,
-	);
-	return auth.handler(c.req.raw);
-})
+		c.env.GOOGLE_CLIENT_SECRET
+	  );
+	  
+	  const session = await authInstance.api.getSession({ headers: c.req.raw.headers });
+	  
+	  if (!session) {
+		return c.json({ error: "Unauthorized" }, 401);
+	  }
+  
+	  return session;
+	} catch (error) {
+	  return c.json({ error: "Unauthorized" }, 401);
+	}
+  }
+  
 
 
 function getDb(databaseUrl: string) {
@@ -54,35 +89,6 @@ function isValidNumber(value: unknown): value is number {
 	return typeof value === 'number' && Number.isFinite(value) && value > 0;
 }
 
-
-async function requireAuth(c: Context<{ Bindings: Env}>) {
-	const authHeader = c.req.header("Authorization";)
-
-	if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-
-  try {
-    // Create auth instance to validate session
-    const auth = createAuth(
-      c.env.DATABASE_URL,
-      c.env.BETTER_AUTH_SECRET,
-      c.env.BETTER_AUTH_URL,
-      c.env.GOOGLE_CLIENT_ID,
-      c.env.GOOGLE_CLIENT_SECRET
-    );
-    
-    const session = await auth.api.getSession({ headers: c.req.raw.headers });
-    
-    if (!session) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
-
-    return session;
-  } catch (error) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-}
 
 
 // ENDPOINTS
