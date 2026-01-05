@@ -4,69 +4,97 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { donations, drives } from './db/schema';
 import { and, eq, ilike, or, desc, min, inArray } from 'drizzle-orm';
-import { createAuth } from './auth';
+import { createAuth } from './lib/auth';
 
 
+const app = new Hono<{ Bindings: { DATABASE_URL: string; AUTH_SECRET: string; BASE_URL: string; CLIENT_URL?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string } }>(
+	
+);
 
 
-export type Env = {
-	DATABASE_URL: string;
-	BETTER_AUTH_SECRET: string;
-	BETTER_AUTH_URL: string;
-	GOOGLE_CLIENT_ID?: string;
-	GOOGLE_CLIENT_SECRET?: string;
-  }
+// export type Env = {
+// 	DATABASE_URL: string;
+// 	BETTER_AUTH_SECRET: string;
+// 	BETTER_AUTH_URL: string;
+// 	GOOGLE_CLIENT_ID?: string;
+// 	GOOGLE_CLIENT_SECRET?: string;
+//   }
   
-  const app = new Hono<{ Bindings: Env }>();
+//   const app = new Hono<{ Bindings: Env }>();
   
   // Enable CORS for all routes
+  // Note: When using credentials: true, origin cannot be '*'
+  // Must specify exact origins
   app.use('/*', cors({
-	origin: '*',
-	allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-	allowHeaders: ['Content-Type', 'Authorization'],
-  }));
+	origin: [
+		'http://localhost:3000',
+		'http://127.0.0.1:3000',
+		'http://localhost:8787',
+		'http://127.0.0.1:8787',
+	],
+	allowHeaders: ["Content-Type", "Authorization", "Cookie"],
+	allowMethods: ["POST", "GET", "OPTIONS", "PUT", "DELETE", "PATCH"],
+	exposeHeaders: ["Content-Length", "Set-Cookie"],
+	maxAge: 600,
+	credentials: true,
+}));
+
+
+// Mount BetterAuth handler - matches baseURL /api/auth
+app.all('/api/auth/*', async (c) => {
+	const auth = createAuth({
+		DATABASE_URL: c.env.DATABASE_URL,
+		AUTH_SECRET: c.env.AUTH_SECRET,
+		BASE_URL: c.env.BASE_URL,
+		CLIENT_URL: c.env.CLIENT_URL,
+		GOOGLE_CLIENT_ID: c.env.GOOGLE_CLIENT_ID,
+		GOOGLE_CLIENT_SECRET: c.env.GOOGLE_CLIENT_SECRET,
+	});
+	return auth.handler(c.req.raw);
+});
   
   // Mount BetterAuth routes
-  app.all("/api/auth/*", async (c) => {
-	const authInstance = createAuth(
-	  c.env.DATABASE_URL,
-	  c.env.BETTER_AUTH_SECRET,
-	  c.env.BETTER_AUTH_URL,
-	  c.env.GOOGLE_CLIENT_ID,
-	  c.env.GOOGLE_CLIENT_SECRET
-	);
-	return authInstance.handler(c.req.raw);
-  });
+// app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+//   app.all("/api/auth/*", async (c) => {
+// 	const authInstance = createAuth(
+// 	  c.env.DATABASE_URL,
+// 	  c.env.BETTER_AUTH_SECRET,
+// 	  c.env.BETTER_AUTH_URL,
+// 	  c.env.GOOGLE_CLIENT_ID,
+// 	  c.env.GOOGLE_CLIENT_SECRET
+// 	);
+// 	return authInstance.handler(c.req.raw);
+//   });
   
 
-async function requireAuth(c: Context<{ Bindings: Env }>) {
-	const authHeader = c.req.header("Authorization");
+// async function requireAuth(c: Context<{ Bindings: Env }>) {
+// 	const authHeader = c.req.header("Authorization");
 	
-	if (!authHeader || !authHeader.startsWith("Bearer ")) {
-	  return c.json({ error: "Unauthorized" }, 401);
-	}
+// 	if (!authHeader || !authHeader.startsWith("Bearer ")) {
+// 	  return c.json({ error: "Unauthorized" }, 401);
+// 	}
   
-	try {
-	  // Create auth instance to validate session
-	  const authInstance = createAuth(
-		c.env.DATABASE_URL,
-		c.env.BETTER_AUTH_SECRET,
-		c.env.BETTER_AUTH_URL,
-		c.env.GOOGLE_CLIENT_ID,
-		c.env.GOOGLE_CLIENT_SECRET
-	  );
+// 	try {
+// 	  // Create auth instance to validate session
+// 	  const authInstance = createAuth(
+// 		c.env.DATABASE_URL,
+// 		c.env.BETTER_AUTH_SECRET,
+// 		c.env.BETTER_AUTH_URL,
+// 		c.env.GOOGLE_CLIENT_ID,
+// 		c.env.GOOGLE_CLIENT_SECRET
+// 	  );
 	  
-	  const session = await authInstance.api.getSession({ headers: c.req.raw.headers });
+// 	  const session = await authInstance.api.getSession({ headers: c.req.raw.headers });
 	  
-	  if (!session) {
-		return c.json({ error: "Unauthorized" }, 401);
-	  }
+// 	  if (!session) {
+// 		return c.json({ error: "Unauthorized" }, 401);
+// 	  }
   
-	  return session;
-	} catch (error) {
-	  return c.json({ error: "Unauthorized" }, 401);
-	}
-  }
+// 	  return session;
+// 	} catch (error) {
+// 	  return c.json({ error: "Unauthorized" }, 401);
+// 	}
+//   }
   
 
 
@@ -253,13 +281,22 @@ app.post('/drives', async (c) => {
 // Submit a donation to a drive
 app.post('/donations', async (c) => {
 	try {
-		// Require authentication
-		const session = await requireAuth(c);
-		
-		// If requireAuth returns a Response (error), return it
-		if (session instanceof Response) {
-		return session;
-		}
+    // ✅ Get session using BetterAuth
+	const auth = createAuth({
+		DATABASE_URL: c.env.DATABASE_URL,
+		AUTH_SECRET: c.env.AUTH_SECRET,
+		BASE_URL: c.env.BASE_URL,
+		CLIENT_URL: c.env.CLIENT_URL,
+		GOOGLE_CLIENT_ID: c.env.GOOGLE_CLIENT_ID,
+		GOOGLE_CLIENT_SECRET: c.env.GOOGLE_CLIENT_SECRET,
+	});
+    const session = await auth.api.getSession({
+		headers: c.req.raw.headers,
+	  });
+	  
+	  if (!session) {
+		return c.json({ error: 'Please sign in to donate' }, 401);
+	  }
 
 		// Now you have the authenticated user
 		const userId = session.user.id;
