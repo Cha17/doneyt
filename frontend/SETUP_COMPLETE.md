@@ -191,3 +191,5 @@ export default async function ProfilePage() {
 - Verify `CLIENT_URL` matches frontend URL
 - Make sure `credentials: 'include'` is used in requests
 
+
+

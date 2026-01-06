@@ -3,9 +3,12 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAuthenticated, signOut, isLoading } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -13,6 +16,11 @@ export default function Header() {
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    closeMenu();
   };
 
   return (
@@ -27,7 +35,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-24 ml-auto">
+        <div className="hidden md:flex items-center gap-6 ml-auto">
           <Link
             href="/drives"
             className="text-white hover:opacity-80 transition-opacity"
@@ -40,15 +48,33 @@ export default function Header() {
           >
             about
           </Link>
-          <Link
-            href="/profile"
-            className="text-white hover:opacity-80 transition-opacity"
-          >
-            profile
-          </Link>
-          {/* <Link href="/sample" className="text-white">
-            sample
-          </Link> */}
+
+          {isLoading ? (
+            <span className="text-white">Loading...</span>
+          ) : isAuthenticated ? (
+            <>
+              <Link
+                href="/profile"
+                className="text-white hover:opacity-80 transition-opacity"
+              >
+                profile
+              </Link>
+              <Button
+                onClick={handleSignOut}
+                variant="ghost"
+                className="text-white hover:bg-white/10"
+              >
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="text-white hover:opacity-80 transition-opacity"
+            >
+              Login
+            </Link>
+          )}
         </div>
 
         {/* Mobile Burger Button */}
@@ -88,20 +114,34 @@ export default function Header() {
           >
             about
           </Link>
-          <Link
-            href="/profile"
-            className="text-white hover:opacity-80 transition-opacity py-2 text-center"
-            onClick={closeMenu}
-          >
-            profile
-          </Link>
-          {/* <Link
-            href="/sample"
-            className="text-white hover:opacity-80 transition-opacity py-2"
-            onClick={closeMenu}
-          >
-            sample
-          </Link> */}
+
+          {isLoading ? (
+            <span className="text-white text-center py-2">Loading...</span>
+          ) : isAuthenticated ? (
+            <>
+              <Link
+                href="/profile"
+                className="text-white hover:opacity-80 transition-opacity py-2 text-center"
+                onClick={closeMenu}
+              >
+                profile
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="text-white hover:opacity-80 transition-opacity py-2 text-center"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="text-white hover:opacity-80 transition-opacity py-2 text-center"
+              onClick={closeMenu}
+            >
+              Login
+            </Link>
+          )}
         </nav>
       </div>
     </header>

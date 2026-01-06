@@ -23,12 +23,14 @@ I've created the following files for you:
 ## ✅ Step 3: Verify Setup
 
 ### Check if files exist:
+
 - ✅ `frontend/lib/auth-client.ts`
 - ✅ `frontend/components/providers/AuthProvider.tsx`
 - ✅ `frontend/lib/hooks/useAuth.ts`
 - ✅ `frontend/app/layout.tsx` (updated)
 
 ### Restart your frontend dev server:
+
 ```bash
 cd frontend
 # Stop current server (Ctrl+C)
@@ -80,7 +82,7 @@ export default function LoginForm() {
       email: "user@example.com",
       password: "password123",
     });
-    
+
     if (result.error) {
       console.error("Sign in failed:", result.error);
     } else {
@@ -123,22 +125,29 @@ export default function Profile() {
 ## 🔍 Troubleshooting
 
 ### Issue: "Cannot find module '@/lib/auth-client'"
+
 **Solution:** Make sure the file exists at `frontend/lib/auth-client.ts`
 
 ### Issue: Environment variable not working
-**Solution:** 
+
+**Solution:**
+
 - Check `.env.local` exists in `frontend/` directory
 - Restart Next.js dev server
 - Make sure variable name starts with `NEXT_PUBLIC_`
 
 ### Issue: AuthProvider not working
+
 **Solution:**
+
 - Check `layout.tsx` imports `AuthProvider` correctly
 - Make sure `AuthProvider` wraps `{children}`
 - Check browser console for errors
 
 ### Issue: CORS errors
+
 **Solution:**
+
 - Make sure worker CORS allows `http://localhost:3000`
 - Check worker is running on port 8787
 - Verify `CLIENT_URL` in worker `.dev.vars` matches frontend URL
@@ -146,6 +155,7 @@ export default function Profile() {
 ## 📚 Available Auth Methods
 
 From `authClient`:
+
 - `signIn.email()` - Sign in with email/password
 - `signUp.email()` - Sign up with email/password
 - `signOut()` - Sign out current user
@@ -153,9 +163,9 @@ From `authClient`:
 - `getSession()` - Get current session (non-hook)
 
 From `useAuth` hook:
+
 - `user` - Current user object
 - `session` - Current session object
 - `isAuthenticated` - Boolean if user is logged in
 - `isLoading` - Boolean if auth state is loading
 - `signIn`, `signUp`, `signOut` - Auth methods
-
