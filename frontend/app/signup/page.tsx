@@ -47,7 +47,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#012326] to-[#013e4a]">
+    <div className="min-h-screen flex flex-col bg-linear-to-br from-[#012326] to-[#013e4a]">
       <Header />
       <main className="flex-1 flex items-center justify-center pt-24 px-4">
         <Card className="w-full max-w-md p-8 bg-linear-to-br from-[#06AAC3] to-[#00163D] border border-none">

@@ -366,7 +366,7 @@ app.post('/donations', async (c) => {
 })
 
 // Get donations | with pagination, filtering, and searching
-app.get('/doantions', async (c) => {
+app.get('/donations', async (c) => {
 	try {
 		const db = getDb(c.env.DATABASE_URL);
 
@@ -418,6 +418,25 @@ app.get('/doantions', async (c) => {
 	} catch (error) {
 		console.error("Error fetching donations:", error);
 		return c.json({ error: "Internal server error" }, 500);
+	}
+})
+
+
+// Get a single donation by ID
+app.get('/donations/:id', async (c) => {
+	try {
+		const db = getDb(c.env.DATABASE_URL);
+		const id = c.req.param('id');
+		if (typeof id !== "string" || !id.match(/^[0-9a-fA-F\-]{36}$/)) {
+			return c.json({ error: "Invalid donation ID" }, 400);
+		}
+		const donation = await db.select().from(donations).where(eq(donations.id, id)).limit(1);
+		if (!donation || donation.length === 0) {
+			return c.json({ error: "Donation not found" }, 404);
+		}
+		return c.json({ donation: donation[0] }, 200);
+	} catch (error) {
+		return c.json({error: 'Internal server error'}, 500);
 	}
 })
 
