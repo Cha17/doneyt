@@ -9,10 +9,10 @@ export default function Hero() {
       <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 md:gap-30">
         {/* Left Column */}
         <div className="flex-1 w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left py-6 md:py-25">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold text-neutral-100 mb-4 leading-tight">
             Make an Impact
           </h1>
-          <p className="text-base text-white leading-relaxed mb-8 max-w-xl">
+          <p className="text-base text-neutral-50 leading-relaxed mb-8 max-w-xl">
             Support causes you care about. Every donation counts. Empowering
             generosity with a simple, secure, and trusted donation platform.
           </p>

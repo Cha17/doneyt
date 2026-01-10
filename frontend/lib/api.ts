@@ -129,12 +129,67 @@ export interface SubmitDonationRequest {
 }
 
 export interface Donation {
-    id: number;
-    driveId: number;
+    id: string;
+    userId: string | null;
+    driveId: number | null;
     amount: number;
     dateDonated: string;
+    createdAt: string;
+    updatedAt: string;
+    drive?: Drive | null;
 }
 
+export interface DonationsResponse {
+    donations: Donation[];
+}
+
+// Fetch user donations (requires authentication)
+export async function fetchUserDonations(params?: {
+    skip?: number;
+    take?: number;
+    includeDrive?: boolean;
+}): Promise<DonationsResponse> {
+    const searchParams = new URLSearchParams();
+    
+    if (params?.skip !== undefined) {
+        searchParams.append("skip", params.skip.toString());
+    }
+    if (params?.take !== undefined) {
+        searchParams.append("take", params.take.toString());
+    }
+    if (params?.includeDrive !== undefined) {
+        searchParams.append("includeDrive", params.includeDrive.toString());
+    }
+
+    const url = `${API_URL}/donations${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+
+    try {
+        const response = await fetch(url, {
+            credentials: 'include', // Important: include cookies for authentication
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error("Please sign in to view your donations");
+            }
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error || `Failed to fetch donations: ${response.statusText} (${response.status})`;
+            throw new Error(errorMessage);
+        }
+
+        return await response.json();
+    } catch (error) {
+        // Handle network errors (server not running, CORS, etc.)
+        if (error instanceof TypeError && error.message === 'Failed to fetch') {
+            throw new Error(
+                `Unable to connect to the API server at ${API_URL}. ` +
+                `Please ensure the backend server is running. ` +
+                `If you're using a Cloudflare Worker, run 'npm run dev' in the worker directory.`
+            );
+        }
+        throw error;
+    }
+}
 
 export async function submitDonation(donation: SubmitDonationRequest): Promise<Donation> {
     const response = await fetch(`${API_URL}/donations`, {
@@ -142,6 +197,7 @@ export async function submitDonation(donation: SubmitDonationRequest): Promise<D
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include', // Important: include cookies for authentication
         body: JSON.stringify({
             driveId: donation.driveId,
             amount: donation.amount,
@@ -149,6 +205,9 @@ export async function submitDonation(donation: SubmitDonationRequest): Promise<D
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            throw new Error("Please sign in to make a donation");
+        }
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.error || `Failed to submit donation: ${response.statusText}`;
         throw new Error(errorMessage); 

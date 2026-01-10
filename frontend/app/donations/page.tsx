@@ -1,7 +1,6 @@
 "use client";
 
-import { allDrives, userDonations } from "@/data/allDrives";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/formatCurrency";
@@ -11,33 +10,106 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DonationReceiptModal from "../components/DonationReceiptModal";
 import Footer from "../components/Footer";
+import { fetchUserDonations, Donation, transformDrive } from "@/lib/api";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { useRouter } from "next/navigation";
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 export default function DonationsPage() {
-  const totalDonations = userDonations.reduce<number>(
-    (sum, donation) => sum + donation.amount,
-    0
-  );
-  const donationCount = userDonations.length;
-
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const router = useRouter();
+  const [donations, setDonations] = useState<Donation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [open, setOpen] = useState<boolean>(false);
   const [selected, setSelected] = useState<{
-    donation: (typeof userDonations)[number];
-    drive: (typeof allDrives)[number];
+    donation: { driveId: string; amount: number; date: string };
+    drive: { driveId: number; title: string; organization: string; imageUrl: string };
   } | null>(null);
+
+  useEffect(() => {
+    // Redirect if not authenticated
+    if (!authLoading && !isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+
+    if (isAuthenticated) {
+      loadDonations();
+    }
+  }, [isAuthenticated, authLoading, router]);
+
+  async function loadDonations() {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await fetchUserDonations({ 
+        take: 1000, // Fetch all donations for pagination
+        includeDrive: true 
+      });
+      setDonations(response.donations);
+      setCurrentPage(1); // Reset to first page when loading new data
+    } catch (err: any) {
+      console.error("Error loading donations:", err);
+      setError(err.message || "Failed to load donations. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const handleOpen = (donation: Donation) => {
+    if (!donation.drive || !donation.driveId) return;
+    
+    const transformedDrive = transformDrive(donation.drive);
+    setSelected({
+      donation: {
+        driveId: donation.driveId.toString(),
+        amount: donation.amount,
+        date: formatDate(donation.dateDonated),
+      },
+      drive: transformedDrive,
+    });
+    setOpen(true);
+  };
+
+  const totalDonations = donations.reduce<number>(
+    (sum, donation) => sum + donation.amount,
+    0
+  );
+  const donationCount = donations.length;
 
   const ITEMS_PER_PAGE = 10;
   const totalPages = Math.ceil(donationCount / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedDonations = userDonations.slice(startIndex, endIndex);
+  const paginatedDonations = donations.slice(startIndex, endIndex);
 
-  const handleOpen = (donation: (typeof userDonations)[number]) => {
-    const drive = allDrives.find((d) => d.driveId === donation.driveId);
-    if (!drive) return;
-    setSelected({ donation, drive });
-    setOpen(true);
-  };
+  if (authLoading || isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-linear-to-tr from-[#012326] to-[#013e4a] font-sans dark:bg-black">
+        <Header />
+        <main className="flex-1 pt-24 flex items-center justify-center">
+          <div className="text-white text-center">
+            <p className="text-xl">Loading...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect in useEffect
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-tr from-[#012326] to-[#013e4a] font-sans dark:bg-black">
@@ -93,7 +165,11 @@ export default function DonationsPage() {
               </Link>
             </div>
 
-            {userDonations.length === 0 ? (
+            {error ? (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-800 text-sm">{error}</p>
+              </div>
+            ) : donations.length === 0 ? (
               <p className="text-gray-600 text-center py-10">
                 You have not made any donations yet.
               </p>
@@ -101,14 +177,14 @@ export default function DonationsPage() {
               <>
                 <div className="space-y-4">
                   {paginatedDonations.map((donation) => {
-                    const drive = allDrives.find(
-                      (d) => d.driveId === donation.driveId
-                    );
-                    if (!drive) return null;
+                    if (!donation.drive || !donation.driveId) return null;
+                    
+                    const transformedDrive = transformDrive(donation.drive);
+                    const donationDate = formatDate(donation.dateDonated);
 
                     return (
                       <button
-                        key={donation.driveId}
+                        key={donation.id}
                         type="button"
                         onClick={() => handleOpen(donation)}
                         className="w-full text-left"
@@ -120,8 +196,8 @@ export default function DonationsPage() {
                             <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
                               <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0">
                                 <Image
-                                  src={drive.imageUrl}
-                                  alt={drive.title}
+                                  src={transformedDrive.imageUrl}
+                                  alt={transformedDrive.title}
                                   width={80}
                                   height={80}
                                   className="object-cover w-full h-full"
@@ -130,17 +206,17 @@ export default function DonationsPage() {
                               {/* Drive Name and Organization */}
                               <div className="flex-1 min-w-0">
                                 <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1">
-                                  {drive.title}
+                                  {transformedDrive.title}
                                 </h3>
                                 <p className="text-xs sm:text-sm text-gray-600">
-                                  {drive.organization}
+                                  {transformedDrive.organization}
                                 </p>
                               </div>
                             </div>
                             {/* Second Row (Mobile) / Right Column (Desktop): Amount and Date */}
                             <div className="flex sm:flex-col sm:items-end items-center justify-between sm:justify-end shrink-0">
                               <span className="text-xs sm:text-sm text-gray-500 sm:order-2">
-                                {donation.date}
+                                {donationDate}
                               </span>
                               <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#032040] sm:mb-1 sm:order-1">
                                 {formatCurrency(donation.amount)}
@@ -154,7 +230,7 @@ export default function DonationsPage() {
                 </div>
 
                 {/* Pagination */}
-                {userDonations.length > ITEMS_PER_PAGE && (
+                {donations.length > ITEMS_PER_PAGE && (
                   <>
                     <div className="flex justify-center items-center gap-2 mt-12 mb-8">
                       <Button
@@ -205,12 +281,12 @@ export default function DonationsPage() {
       </main>
       <Footer />
 
-      {userDonations.length > 0 && selected && (
+      {selected && (
         <DonationReceiptModal
           open={open}
           onOpenChange={setOpen}
           donation={selected.donation}
-          drive={selected.drive}
+          drive={selected.drive as any}
         />
       )}
     </div>

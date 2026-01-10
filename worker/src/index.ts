@@ -370,51 +370,90 @@ app.get('/donations', async (c) => {
 	try {
 		const db = getDb(c.env.DATABASE_URL);
 
+		// Try to get authenticated user (optional)
+		const auth = createAuth({
+			DATABASE_URL: c.env.DATABASE_URL,
+			AUTH_SECRET: c.env.AUTH_SECRET,
+			BASE_URL: c.env.BASE_URL,
+			CLIENT_URL: c.env.CLIENT_URL,
+			GOOGLE_CLIENT_ID: c.env.GOOGLE_CLIENT_ID,
+			GOOGLE_CLIENT_SECRET: c.env.GOOGLE_CLIENT_SECRET,
+		});
+		const session = await auth.api.getSession({
+			headers: c.req.raw.headers,
+		});
+
 		const driveIdParam = c.req.query('driveId');
+		const userIdParam = c.req.query('userId');
 		const skip = Math.max(0, parseIntParam(c.req.query("skip"), 0));
 		const take = Math.min(100, Math.max(1, parseIntParam(c.req.query("take"), 10)));
 		const includeDrive = c.req.query('includeDrive') === 'true';
 
-		let whereCondition = undefined;
+		const whereConditions = [];
 
-		if (driveIdParam) {
-		const driveId = Number.parseInt(driveIdParam, 10);
-		if (!Number.isFinite(driveId)) {
-			return c.json({ error: "Invalid driveId" }, 400);
-		}
-		whereCondition = eq(donations.driveId, driveId);
+		// If userId query param is provided and user is authenticated, use it
+		// Otherwise, if user is authenticated, filter by their userId
+		if (userIdParam && session && session.user.id === userIdParam) {
+			whereConditions.push(eq(donations.userId, userIdParam));
+		} else if (!userIdParam && !driveIdParam && session) {
+			// If no filter specified and user is authenticated, return their donations
+			whereConditions.push(eq(donations.userId, session.user.id));
+		} else if (driveIdParam) {
+			// Filter by driveId (public access)
+			const driveId = Number.parseInt(driveIdParam, 10);
+			if (!Number.isFinite(driveId)) {
+				return c.json({ error: "Invalid driveId" }, 400);
+			}
+			whereConditions.push(eq(donations.driveId, driveId));
+		} else if (userIdParam && !session) {
+			// User requested userId filter but not authenticated - unauthorized
+			return c.json({ error: "Unauthorized to view other users' donations" }, 401);
 		}
 
-		const queryBuilder = whereCondition 
-		? db.select().from(donations).where(whereCondition)
-		: db.select().from(donations);
+		let whereClause = undefined;
+		if (whereConditions.length === 1) {
+			whereClause = whereConditions[0];
+		} else if (whereConditions.length > 1) {
+			whereClause = and(...whereConditions);
+		}
+
+		const queryBuilder = whereClause 
+			? db.select().from(donations).where(whereClause)
+			: db.select().from(donations);
 		  
 		const donationsList = await queryBuilder
 			.orderBy(desc(donations.dateDonated))
 			.limit(take)
 			.offset(skip);
 
+		// If includeDrive is requested and we have donations, fetch drive details
 		if (includeDrive && donationsList.length > 0) {
 			const driveIds = [
 			  ...new Set(donationsList.map((d) => d.driveId).filter((id) => id !== null)),
 			];
 			  
+			// Fetch drives if there are any driveIds
+			let drivesMap = new Map();
 			if (driveIds.length > 0) {
 			  const drivesList = await db
 				.select()
 				.from(drives)
 				.where(inArray(drives.id, driveIds));
 			  
-			  const drivesMap = new Map(drivesList.map((d) => [d.id, d]));
-			  
-			  const donationsWithDrives = donationsList.map((donation) => ({
+			  drivesMap = new Map(drivesList.map((d) => [d.id, d]));
+			}
+			
+			// Always return donations with drive property when includeDrive is true
+			const donationsWithDrives = donationsList.map((donation) => ({
 				...donation,
 				drive: donation.driveId ? drivesMap.get(donation.driveId) || null : null,
-			  }));
+			}));
 			  
-			  return c.json(donationsWithDrives, 200);
-			}
-		  }
+			return c.json({ donations: donationsWithDrives }, 200);
+		}
+
+		// Return donations without drive details if includeDrive is false
+		return c.json({ donations: donationsList }, 200);
 	} catch (error) {
 		console.error("Error fetching donations:", error);
 		return c.json({ error: "Internal server error" }, 500);
